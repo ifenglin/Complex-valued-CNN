@@ -6,7 +6,7 @@ function [data] = input_loader(input_file)
 %
 %
 % input
-%   input_file       the path to the .mat file that contains a variable
+%   input_file       the path to the .m file that contains a variable
 %                    named 'data'
 %
 % output
