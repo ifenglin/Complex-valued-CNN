@@ -4,4 +4,6 @@ a = zeros(64,64,3,5);
 data = complex(a, 1);
 save 'testdata.mat' data;
 % load the matrix
-input_loader('testdata.mat');
+data = input_loader('testdata.mat');
+myBlob = Blob(data);
+myBlob.get_data();
