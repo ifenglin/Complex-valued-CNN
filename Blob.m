@@ -16,7 +16,7 @@ classdef Blob
             if nargin < 3
                 data = self.data;
             else
-                data = self.data(rows, cols);
+                data = self.data(rows, cols, :);
             end
         end
         function set_data(self, data)
@@ -28,7 +28,7 @@ classdef Blob
         function width = get_width(self)
             width = size(self.data, 2);
         end
-        function channels = get_num_channels(self)
+        function channels = get_channels(self)
             channels = size(self.data, 3);
         end
         function num = get_num(self)
