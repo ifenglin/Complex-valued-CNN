@@ -37,8 +37,15 @@ classdef Net
             %CHECK(isscalar(blob_index), 'blob_index must be a scalar');
             blob = self.layer_vec(self.name2layer_index(layer_name)).params(blob_index);
         end
-        function forward_prefilled(self)
-            % do something
+        function self = forward_prefilled(self)
+            % layer i takes blob i and store results in blob i+1
+            % check the number of layers is exactly one fewer than
+            % the number of blobs 
+            assert(length(self.layer_vec) == length(self.blob_vec)-1);
+            for i = 1:length(self.layer_vec)
+                result = self.layer_vec(i).forward(self.blob_vec(i));
+                self.blob_vec(i+1) = Blob(result.get_data());
+            end 
         end
         function backward_prefilled(self)
             % do something
@@ -51,11 +58,11 @@ classdef Net
             for n = 1:length(self.inputs)
                 self.blobs(self.inputs{n}).set_data(input_data{n});
             end
-            self.forward_prefilled();
+            self = self.forward_prefilled();
             % retrieve data from output blobs
-            res = cell(length(self.outputs), 1);
+            res(1,length(self.outputs)) = Blob();
             for n = 1:length(self.outputs)
-                res{n} = self.blobs(self.outputs{n}).get_data();
+                res(n) = self.blobs(self.outputs{n});
             end
         end
         function res = backward(self, output_diff)
@@ -70,7 +77,7 @@ classdef Net
             % retrieve diff from input blobs
             res = cell(length(self.inputs), 1);
             for n = 1:length(self.inputs)
-              res{n} = self.blobs(self.inputs{n}).get_diff();
+              res{n} = self.blobs(self.outputs{n}).get_diff();
             end
         end
         function copy_from(self, weights_file)

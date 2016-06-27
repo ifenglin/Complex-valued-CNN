@@ -16,7 +16,7 @@ classdef pooling_layer < Layer
             self.kernel_size = kernel_size;
             self.stride = stride;
         end
-        function output_data = forward(self, input_data)
+        function output_blob = forward(self, input_data)
             % prepare kernel
             %kernel = ones(self.kernel_size, self.kernel_size);
             %kernel = complex(kernel);
@@ -48,8 +48,7 @@ classdef pooling_layer < Layer
                     %disp(output_data(i, j, k));
                 end
             end
-            
-            % do something
+            output_blob = Blob(output_data);
         end
         function backward()
             % do something

@@ -16,7 +16,7 @@ classdef convolution_layer < Layer
             self.kernel_size = kernel_size;
             self.stride = stride;
         end
-        function output_data = forward(self, input_data)
+        function output_blob = forward(self, input_data)
             %prepare kernel
             num_channels = input_data.get_channels();
             kernel = ones(self.kernel_size, self.kernel_size, num_channels);
@@ -41,7 +41,7 @@ classdef convolution_layer < Layer
                     %disp(output_data(i, j, :));
                 end
             end
-            % do something
+            output_blob = Blob(output_data);
         end
         function backward()
             % do something

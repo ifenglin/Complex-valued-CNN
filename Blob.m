@@ -8,9 +8,11 @@ classdef Blob
     
     methods
         function self = Blob(data)
+            if nargin == 1 
             % CHECK(is_valid_handle(hBlob_blob), 'invalid Blob handle');
             % setup self handle
-            self.data = data;
+                self.data = data;
+            end
         end
         function data = get_data(self, rows, cols)
             if nargin < 3
