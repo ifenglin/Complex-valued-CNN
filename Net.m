@@ -30,6 +30,7 @@ classdef Net
         end
         function blob = blobs(self, blob_name)
             %CHECK(ischar(blob_name), 'blob_name must be a string');
+            assert (ischar(blob_name))
             blob = self.blob_vec(self.name2blob_index(blob_name));
         end
         function blob = params(self, layer_name, blob_index)
@@ -37,47 +38,56 @@ classdef Net
             %CHECK(isscalar(blob_index), 'blob_index must be a scalar');
             blob = self.layer_vec(self.name2layer_index(layer_name)).params(blob_index);
         end
-        function self = forward_prefilled(self)
-            % layer i takes blob i and store results in blob i+1
-            % check the number of layers is exactly one fewer than
-            % the number of blobs 
-            assert(length(self.layer_vec) == length(self.blob_vec)-1);
-            for i = 1:length(self.layer_vec)
-                result = self.layer_vec(i).forward(self.blob_vec(i));
-                self.blob_vec(i+1) = Blob(result.get_data());
-            end 
+        function forward_prefilled(~)
         end
-        function backward_prefilled(self)
-            % do something
+        function backward_prefilled(~)
         end
-        function res = forward(self, input_data)
+        function [self, res] = forward(self, input_data)
             %CHECK(iscell(input_data), 'input_data must be a cell array');
             %CHECK(length(input_data) == length(self.inputs), ...
             %  'input data cell length must match input blob number');
             % copy data to input blobs
             for n = 1:length(self.inputs)
-                self.blobs(self.inputs{n}).set_data(input_data{n});
+                self.blob_vec(self.name2blob_index(self.inputs{n})) = ...
+                    self.blob_vec(self.name2blob_index(self.inputs{n})).set_data(input_data{n});
             end
-            self = self.forward_prefilled();
+            % self = self.forward_prefilled();
+            % layer i takes blob i and store results in blob i+1
+            % check the number of layers is exactly one fewer than
+            % the number of blobs 
+            assert(length(self.layer_vec) == length(self.blob_vec)-1);
+            for i = 1:length(self.layer_vec)
+                [self.layer_vec(i), data] = self.layer_vec(i).forward(self.blob_vec(i));
+                self.blob_vec(i+1) = self.blob_vec(i+1).set_data(data);
+            end 
             % retrieve data from output blobs
             res(1,length(self.outputs)) = Blob();
             for n = 1:length(self.outputs)
                 res(n) = self.blobs(self.outputs{n});
             end
         end
-        function res = backward(self, output_diff)
-            CHECK(iscell(output_diff), 'output_diff must be a cell array');
-            CHECK(length(output_diff) == length(self.outputs), ...
-              'output diff cell length must match output blob number');
+        function [self, res] = backward(self, input_diff)
+            %CHECK(iscell(output_diff), 'output_diff must be a cell array');
+            %CHECK(length(output_diff) == length(self.outputs), ...
+            %  'output diff cell length must match output blob number');
             % copy diff to output blobs
             for n = 1:length(self.outputs)
-              self.blobs(self.outputs{n}).set_diff(output_diff{n});
+                self.blob_vec(self.name2blob_index(self.outputs{n})) = ...
+                    self.blob_vec(self.name2blob_index(self.outputs{n})).set_diff(input_diff{n});
             end
-            self.backward_prefilled();
+            % self.backward_prefilled();
+            % layer i takes blob i+1 and store results in blob i
+            % check the number of layers is exactly one fewer than
+            % the number of blobs 
+            assert(length(self.layer_vec) == length(self.blob_vec)-1);
+            for i = fliplr(1:length(self.layer_vec))
+                [self.layer_vec(i), diff] = self.layer_vec(i).backward(self.blob_vec(i+1));
+                self.blob_vec(i) = self.blob_vec(i).set_diff(diff);
+            end 
             % retrieve diff from input blobs
-            res = cell(length(self.inputs), 1);
+            res(1,length(self.outputs)) = Blob();
             for n = 1:length(self.inputs)
-              res{n} = self.blobs(self.outputs{n}).get_diff();
+              res(n) = self.blobs(self.inputs{n});
             end
         end
         function copy_from(self, weights_file)
