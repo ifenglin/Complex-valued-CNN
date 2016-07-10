@@ -31,13 +31,13 @@ classdef convolution_layer < Layer
                 (input_blob.get_height() - self.kernel_size) / self.stride + 1, ...
                 (input_blob.get_width() - self.kernel_size) / self.stride + 1, ...
                 self.num_output));  % the size of output data is shrinked dimensions by num_output
-            
+            % index of the left top corner of a patch in pad
             x = 1:self.stride:input_blob.get_height() - self.kernel_size + 1;
             y = 1:self.stride:input_blob.get_width() - self.kernel_size + 1;
             for i = 1:length(x)
                 for j = 1:length(y)
-                    patch_reshaped = input_blob.get_data(x(i):x(i)+self.kernel_size-1, y(j):y(j)+self.kernel_size-1);
-                    patch_reshaped = reshape(patch_reshaped, [], num_channels); 
+                    patch = input_blob.get_data(x(i):x(i)+self.kernel_size-1, y(j):y(j)+self.kernel_size-1);
+                    patch_reshaped = reshape(patch, [], num_channels); 
                     output_data(i, j, :) = sum(patch_reshaped * self.kernels, 1);      
                 end
             end
@@ -49,14 +49,15 @@ classdef convolution_layer < Layer
                 (input_blob.get_height() - 1) / self.stride + self.kernel_size, ...
                 (input_blob.get_width() - 1) / self.stride + self.kernel_size, ...
                 num_channels));  % the size of output data is the expended dimensions by num_output
-            
+            % calculate the additional pixels needed for de-convolute on the
+            % boundaries
             pad = complex(ones(input_blob.get_height() + self.kernel_size + 1, ...
                         input_blob.get_width() + self.kernel_size + 1, ...
                         self.num_output), 0);
             pad(floor(self.kernel_size-1)/2 : input_blob.get_height() + floor(self.kernel_size-1)/2 -1, ...
                 floor(self.kernel_size-1)/2 : input_blob.get_width() +  floor(self.kernel_size-1)/2 -1, ...
                  :) = complex(input_blob.get_diff());
-            
+            % index of the left top corner of a patch in pad
             x = 1:self.stride:input_blob.get_height()  + (self.stride * self.kernel_size) - 1;
             y = 1:self.stride:input_blob.get_width()  + (self.stride * self.kernel_size) - 1;
             for i = 1:length(x)

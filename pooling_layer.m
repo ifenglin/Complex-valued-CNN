@@ -23,11 +23,16 @@ classdef pooling_layer < Layer
             self.stride = stride;
         end
         function [self, output_data] = forward(self, input_blob)
+            % calculate the additional pixels needed for pooling on the
+            % boundaries
             self.h_margin = self.stride - mod(input_blob.get_height(),self.stride);
             self.w_margin = self.stride - mod(input_blob.get_width(),self.stride);
+            % calculate the range of index of height and width of inputs in
+            % an extended (margin-inclusive) pad
             self.h_range = floor(self.h_margin/2)+1 : input_blob.get_height()+floor(self.h_margin/2);
             self.w_range = floor(self.w_margin/2)+1 : input_blob.get_width()+floor(self.w_margin/2);
             num_channels = input_blob.get_num_channels();
+            % create a pad and put the input data incide.
             pad = zeros(input_blob.get_height() + self.h_margin,...
                        input_blob.get_width() + self.w_margin,...
                        input_blob.get_num_channels());
@@ -37,16 +42,18 @@ classdef pooling_layer < Layer
                 ( size(pad, 1) - self.kernel_size) / self.stride + 1, ...
                 ( size(pad, 2) - self.kernel_size) / self.stride + 1, ...
                 num_channels);
+            % swtiches set 1 if the pixel in pad is activated; 0 otherwise
             temp_switches = zeros( ...
                 input_blob.get_height(), ...
                 input_blob.get_width(), ...
                 num_channels);
-            
+            % index of the left top corner of a patch in pad
             x = 1:self.stride:size(pad,1) - self.kernel_size + 1;
             y = 1:self.stride:size(pad,2) - self.kernel_size + 1;
             
             for i = 1:length(x)
                 for j = 1:length(y)
+                    % get a patch of kernel_size^2 in pad
                     patch_x = x(i):x(i)+self.kernel_size-1;
                     patch_y = y(j):y(j)+self.kernel_size-1;
                     onepatch = pad(patch_x, patch_y,:);
@@ -63,6 +70,8 @@ classdef pooling_layer < Layer
             %output_blob = input_blob.set_data(output_data);
         end
         function [self, output_diff] = backward(self, input_blob)
+            % calculate the additional pixels needed for pooling on the
+            % boundaries
             pad = zeros(size(self.switches,1) + self.h_margin,...
                         size(self.switches,2) + self.w_margin,...
                         size(self.switches,3));
