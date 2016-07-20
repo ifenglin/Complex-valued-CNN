@@ -28,8 +28,8 @@ classdef convolution_layer < Layer
             rand_kernels_imag = rand(kernel_size, kernel_size, group, num_output ) - 0.5;
             self.kernels = complex(rand_kernels_real, rand_kernels_imag);
             % initialize bias
-            rand_bias_real = zeros(num_output, 1);
-            rand_bias_imag = zeros(num_output, 1);
+            rand_bias_real = zeros(num_output, 1)+1;
+            rand_bias_imag = zeros(num_output, 1)+1;
             self.bias = complex(rand_bias_real, rand_bias_imag);
             self.alpha = alpha;
         end

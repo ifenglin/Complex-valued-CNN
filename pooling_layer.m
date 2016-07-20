@@ -63,6 +63,12 @@ classdef pooling_layer < Layer
                     temp_switches(patch_x, patch_y, :) = reshape(switch_mask, self.kernel_size, self.kernel_size, num_channels);
                 end
             end
+            for i = 1:num_channels
+                nom = norm(output_data(:, :, i));
+                if nom ~= 0
+                    output_data(:, :, i) = output_data(:, :, i) / nom;
+                end
+            end
             self.switches = temp_switches(self.h_range, self.w_range, :);
             %output_blob = input_blob.set_data(output_data);
         end

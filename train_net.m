@@ -7,7 +7,7 @@ inputs = {test_data};
 labels = [0 1 0 0 0];   
 
 % train
-[myNet, est_labels, losses]  = myNet.train(inputs, labels);
+[myNet, est_labels_train, losses_train]  = myNet.train(inputs, labels);
 
 
 % below run propagation separately - only for testing 
