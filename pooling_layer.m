@@ -29,8 +29,8 @@ classdef pooling_layer < Layer
             self.w_margin = self.stride - mod(input_blob.get_width(),self.stride);
             % calculate the range of index of height and width of inputs in
             % an extended (margin-inclusive) pad
-            self.h_range = floor(self.h_margin/2)+1 : input_blob.get_height()+floor(self.h_margin/2);
-            self.w_range = floor(self.w_margin/2)+1 : input_blob.get_width()+floor(self.w_margin/2);
+            self.h_range = ceil(self.h_margin/2) : input_blob.get_height()+ceil(self.h_margin/2)-1;
+            self.w_range = ceil(self.w_margin/2) : input_blob.get_width()+ceil(self.w_margin/2)-1;
             num_channels = input_blob.get_num_channels();
             % create a pad and put the input data incide.
             pad = zeros(input_blob.get_height() + self.h_margin,...
@@ -39,17 +39,14 @@ classdef pooling_layer < Layer
             pad(self.h_range, self.w_range, :) = input_blob.get_data();
            
             output_data = ones( ...
-                ( size(pad, 1) - self.kernel_size) / self.stride + 1, ...
-                ( size(pad, 2) - self.kernel_size) / self.stride + 1, ...
+                ( size(pad, 1) - self.kernel_size) / self.stride , ...
+                ( size(pad, 2) - self.kernel_size) / self.stride , ...
                 num_channels);
             % swtiches set 1 if the pixel in pad is activated; 0 otherwise
-            temp_switches = zeros( ...
-                input_blob.get_height(), ...
-                input_blob.get_width(), ...
-                num_channels);
+            temp_switches = zeros(size(pad));
             % index of the left top corner of a patch in pad
-            x = 1:self.stride:size(pad,1) - self.kernel_size + 1;
-            y = 1:self.stride:size(pad,2) - self.kernel_size + 1;
+            x = 1:self.stride:size(pad,1) - self.kernel_size;
+            y = 1:self.stride:size(pad,2) - self.kernel_size;
             
             for i = 1:length(x)
                 for j = 1:length(y)
@@ -78,8 +75,8 @@ classdef pooling_layer < Layer
             pad(self.h_range, self.w_range, :) = self.switches;
             num_channels = input_blob.get_num_channels();
             % index of the left top corner of a patch in pad
-            x = 1:self.stride:size(pad,1) - self.kernel_size + 1;
-            y = 1:self.stride:size(pad,2) - self.kernel_size + 1;
+            x = 1:self.stride:size(pad,1) - self.kernel_size;
+            y = 1:self.stride:size(pad,2) - self.kernel_size;
             
             for i = 1:length(x)
                 for j = 1:length(y)

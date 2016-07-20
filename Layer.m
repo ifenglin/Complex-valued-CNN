@@ -15,13 +15,16 @@ classdef Layer < matlab.mixin.Heterogeneous
             %    self.params(n) = blobs(n);
             %end
         end
+        function weights = get_weights(~)
+            weights = [];
+        end
         function layer_type = get_type(self)
             layer_type = self.type;
         end
-        function forward(self)
+        function forward(~)
             % do something
         end
-        function backward(self)
+        function backward(~)
             % do something
         end
     end

@@ -2,11 +2,11 @@ classdef Net
     %UNTITLED5 Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties (Access = private)
+    properties 
         layer_vec
         blob_vec
-        inputs % names of blobs as input
-        outputs % names of blobs as output
+        inputs              % names of blobs as input
+        outputs             % names of blobs as output
         name2layer_index
         name2blob_index
         layer_names
@@ -42,11 +42,37 @@ classdef Net
         end
         function backward_prefilled(~)
         end
-        function [self, res] = forward(self, input_data)
-            %CHECK(iscell(input_data), 'input_data must be a cell array');
-            %CHECK(length(input_data) == length(self.inputs), ...
-            %  'input data cell length must match input blob number');
+        function [self, est_labels, losses] = train(self, input_data, labels)
+            % the 4th dimension is number of images
+            num = size(input_data{:}, 4);
+            est_labels = zeros(num, 1);
+            losses = zeros(num, 1);
+            
+            for i = 1:num 
+                disp(sprintf('#### Train image %d ####\n', i));
+                [self, est_labels(i), res] = self.forward({input_data{:}(:,:,:,i)} , labels);
+                losses(i) = res.get_data();
+                self = self.backward();
+            end
+        end
+        
+        function [est_labels, losses] = test(self, input_data, labels)
+            % the 4th dimension is number of images
+            num = size(input_data{:}, 4);
+            est_labels = zeros(num, 1);
+            losses = zeros(num, 1);
+            
+            for i = 1:num 
+                disp(sprintf('#### Test image %d ####\n', i));
+                [self, est_labels(i), res] = self.forward({input_data{:}(:,:,:,i)} , labels);
+                losses(i) = res.get_data();
+            end
+        end
+        
+        
+        function [self, est_label, res] = forward(self, input_data, labels)
             % copy data to input blobs
+            disp('Forward Propagation');
             for n = 1:length(self.inputs)
                 self.blob_vec(self.name2blob_index(self.inputs{n})) = ...
                     self.blob_vec(self.name2blob_index(self.inputs{n})).set_data(input_data{n});
@@ -56,10 +82,28 @@ classdef Net
             % check the number of layers is exactly one fewer than
             % the number of blobs 
             assert(length(self.layer_vec) == length(self.blob_vec)-1);
+            
+            % acummualte weight vector for classifier
+            weight_vector = [];
             for i = 1:length(self.layer_vec)
-                [self.layer_vec(i), data] = self.layer_vec(i).forward(self.blob_vec(i));
-                self.blob_vec(i+1) = self.blob_vec(i+1).set_data(data);
-            end 
+                disp(self.layer_names(i));
+                %tic
+                if ~strcmp(self.layer_vec(i).get_type(), 'classification')
+                    [self.layer_vec(i), data] = self.layer_vec(i).forward(self.blob_vec(i));
+                    self.blob_vec(i+1) = self.blob_vec(i+1).set_data(data);
+                    weight_vector = [weight_vector; reshape(self.layer_vec(i).get_weights(), [], 1)]; %#ok<AGROW>
+                else % if classifier
+                    % assign labels to classifier
+                    self.layer_vec(i) = self.layer_vec(end).set_labels(labels);
+                    % assign weight_vector to classifier
+                    self.layer_vec(i) = self.layer_vec(end).set_weight_vector(weight_vector);
+                    % forward and display estimated label index
+                    [self.layer_vec(i), data, est_label] = self.layer_vec(i).forward(self.blob_vec(i));
+                    self.blob_vec(i+1) = self.blob_vec(i+1).set_data(data);
+                end
+                %toc
+            end
+            
             % retrieve data from output blobs
             res(1,length(self.outputs)) = Blob();
             for n = 1:length(self.outputs)
@@ -67,22 +111,26 @@ classdef Net
             end
         end
         function [self, res] = backward(self, input_diff)
-            %CHECK(iscell(output_diff), 'output_diff must be a cell array');
-            %CHECK(length(output_diff) == length(self.outputs), ...
-            %  'output diff cell length must match output blob number');
+            disp('Backward Propagation');
             % copy diff to output blobs
-            for n = 1:length(self.outputs)
-                self.blob_vec(self.name2blob_index(self.outputs{n})) = ...
-                    self.blob_vec(self.name2blob_index(self.outputs{n})).set_diff(input_diff{n});
+            if nargin > 1
+                for n = 1:length(self.outputs)
+                    self.blob_vec(self.name2blob_index(self.outputs{n})) = ...
+                        self.blob_vec(self.name2blob_index(self.outputs{n})).set_diff(input_diff{n});
+                end
             end
+            
             % self.backward_prefilled();
             % layer i takes blob i+1 and store results in blob i
             % check the number of layers is exactly one fewer than
             % the number of blobs 
             assert(length(self.layer_vec) == length(self.blob_vec)-1);
             for i = fliplr(1:length(self.layer_vec))
+                disp(self.layer_names(i));
+                %tic
                 [self.layer_vec(i), diff] = self.layer_vec(i).backward(self.blob_vec(i+1));
                 self.blob_vec(i) = self.blob_vec(i).set_diff(diff);
+                %toc
             end 
             % retrieve diff from input blobs
             res(1,length(self.outputs)) = Blob();

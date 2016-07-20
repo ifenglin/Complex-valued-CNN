@@ -5,6 +5,7 @@ classdef Blob
     properties (Access = private)
         data
         diff
+        labels
     end
     
     methods
@@ -17,6 +18,7 @@ classdef Blob
                 self.data = data;
                 self.diff = diff;
             end
+            self.labels = [];
         end
         function data = get_data(self, rows, cols, ch)
             if nargin == 1
@@ -52,8 +54,11 @@ classdef Blob
         function channels = get_num_channels(self)
             channels = size(self.data, 3);
         end
-        function num = get_num(self)
-            num = size(self.data, 4);
+        function self = set_labels(self, labels)
+            self.labels = labels;
+        end
+        function labels = get_labels(self)
+            labels = self.labels;
         end
     end
 end
