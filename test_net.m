@@ -1,7 +1,4 @@
-% load data
-% all_data = load('alldata.mat');
-class = load('forest.mat');
-test_data = sample_loader(all_data.all_data, class.forest, (11:20));
+test_data = sample_loader(all_data, forest, (11:20));
 % imshow(test_data(:,:,:,1))
 % create labels
 inputs = {test_data};
