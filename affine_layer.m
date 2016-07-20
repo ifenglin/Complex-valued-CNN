@@ -36,32 +36,41 @@ classdef affine_layer < Layer
             self.forward_input_data = input_data;
             output_data = self.units' * input_data + self.bias;
             self.forward_sum = output_data;
-            output_data = arrayfun(@self.activate, output_data);
+            %output_data = arrayfun(@self.activate, output_data);
             output_data = output_data / norm(output_data);
             %output_data = input_blob.set_data(output_data);
         end
         function [self, output_diff] = backward(self, input_blob)
-            switch self.ReLU
-                case 'ReLU'
-                    input_diff = sum(input_blob.get_diff());
-                    % replicate into num of units
-                    input_diff = repmat(input_diff, self.num, 1);
-                case 'SVM'
-                    input_diff = input_blob.get_diff();
-                    % do nothing
-            end
-            
+%            switch self.ReLU
+%                case 'ReLU'
+%                     input_diff = sum(input_blob.get_diff());
+%                     replicate into num of units
+%                     input_diff = repmat(input_diff, self.num, 1);
+%                 case 'SVM'
+%                     input_diff = input_blob.get_diff();
+%                     do nothing
+%             end
+%             
             % calculate the gradients in each unit
-            gradients_per_unit = arrayfun(@self.d_activate, input_diff, self.forward_sum);
+%            gradients_per_unit = arrayfun(@self.d_activate, input_diff, self.forward_sum);
+            %hermitian conjugate 
+            input_diff = reshape(input_blob.get_diff(), self.num, 1);
+            output_diff = reshape(conj(permute(self.units, [2 1]))' * input_diff, 1, 1, self.num_input);
             
+            gradients_per_weights = input_diff * conj(permute(self.forward_input_data, [2 1]));
+            gradients_per_bias = input_diff .* self.bias;
+            % replicate input data by num
+            forward_input_data_array = repmat(self.forward_input_data, 1, self.num); 
+            self.units = self.units - self.alpha * ( forward_input_data_array .* gradients_per_weights' );
+            self.bias = self.bias - self.alpha * gradients_per_bias;
             % replicate into num_outputs by num_inputs
-            forward_input_data_array = repmat(self.forward_input_data, 1, self.num);
-            gradients_array = repmat(gradients_per_unit, 1, self.num_input)';
+            %forward_input_data_array = repmat(self.forward_input_data, 1, self.num);
+            %gradients_array = repmat(gradients_per_unit, 1, self.num_input)';
             % update weights
-            self.units = self.units - self.alpha * ( forward_input_data_array .* gradients_array );
+            %self.units = self.units - self.alpha * ( forward_input_data_array .* gradients_array );
             % update bias
-            self.bias = self.bias - self.alpha * gradients_per_unit;
-            output_diff = reshape(gradients_per_unit, 1, 1, self.num);
+            %self.bias = self.bias - self.alpha * gradients_per_unit;
+            %output_diff = reshape(gradients_per_unit, 1, 1, self.num);
             %output_blob = input_blob.set_diff(output_data);
         end
     end

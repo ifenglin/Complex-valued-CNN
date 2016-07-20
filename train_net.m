@@ -1,13 +1,28 @@
 % use sample_loader
-test_data = sample_loader(all_data, field, (1:10));
+city = sample_loader(cm_all_data, cm_city, randperm(length(cm_city),10));
+field = sample_loader(cm_all_data, cm_field, randperm(length(cm_field),10));
+forest = sample_loader(cm_all_data, cm_forest, randi(length(cm_forest),10));
+grass = sample_loader(cm_all_data, cm_grass, randi(length(cm_grass),10));
+street = sample_loader(cm_all_data, cm_street, randi(length(cm_street),10));
 % imshow(test_data(:,:,:,1))
 % create labels
-inputs = {test_data};
+inputs = [{city} {field} {forest} {grass} {street}];
 % label in order: city, field, forest, grass, street
-labels = [0 1 0 0 0];   
+labels = [ [1 0 0 0 0]; ...
+           [0 1 0 0 0]; ...
+           [0 0 1 0 0]; ...
+           [0 0 0 1 0]; ...
+           [0 0 0 0 1]];
 
 % train
-[myNet, est_labels_train, losses_train]  = myNet.train(inputs, labels);
+est_labels_train = zeros(5,10);
+losses_train = zeros(5,10);
+for j = 1:10
+    for i = 1:5
+        inputs = [{city(:,:,:,j)} {field(:,:,:,j)} {forest(:,:,:,j)} {grass(:,:,:,j)} {street(:,:,:,j)}];
+        [myNet, est_labels_train(i,j), losses_train(i,j)]  = myNet.train(inputs(i), labels(i,:));
+    end
+end
 
 
 % below run propagation separately - only for testing 
