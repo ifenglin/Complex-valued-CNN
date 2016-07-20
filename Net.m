@@ -46,12 +46,12 @@ classdef Net
             % the 4th dimension is number of images
             num = size(input_data{:}, 4);
             est_labels = zeros(num, 1);
-            losses = zeros(num, 1);
+            losses = zeros(num, 6);
             
             for i = 1:num 
                 disp(sprintf('#### Train image %d ####\n', i));
-                [self, est_labels(i), res] = self.forward({input_data{:}(:,:,:,i)} , labels);
-                losses(i) = res.get_data();
+                [self, est_labels(i), res] = self.forward({input_data{:}(:,:,:,i)} , labels(i,:));
+                losses(i,:) = res.get_data();
                 self = self.backward();
             end
         end
@@ -60,12 +60,12 @@ classdef Net
             % the 4th dimension is number of images
             num = size(input_data{:}, 4);
             est_labels = zeros(num, 1);
-            losses = zeros(num, 1);
+            losses = zeros(num, 6);
             
             for i = 1:num 
                 disp(sprintf('#### Test image %d ####\n', i));
-                [self, est_labels(i), res] = self.forward({input_data{:}(:,:,:,i)} , labels);
-                losses(i) = res.get_data();
+                [self, est_labels(i), res] = self.forward({input_data{:}(:,:,:,i)} , labels(i,:));
+                losses(i, :) = res.get_data();
             end
         end
         

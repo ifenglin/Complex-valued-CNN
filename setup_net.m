@@ -13,7 +13,7 @@ pool_layer4 = pooling_layer('MAX', 3, 3);
 aff_layer1 = affine_layer('ReLU', 128, 128, learning_rate);
 aff_layer2 = affine_layer('ReLU', 128, 128, learning_rate);
 svm = affine_layer('SVM', 128, 5, learning_rate);
-class_layer = classification_layer('Magnitude', 5, 1e-2, 0);
+class_layer = classification_layer('Magnitude', 5, 1e-1, 0);
 layer_vec = [conv_layer2 acti_layer2 pool_layer2 conv_layer3 acti_layer3 pool_layer3 conv_layer4 acti_layer4 pool_layer4 aff_layer1 aff_layer2 svm class_layer];
 layer_names = {'conv2', 'activation2' ,'pooling2', 'conv3', 'activation3' ,'pooling3', 'conv4', 'activation4' ,'pooling4', 'fc1', 'fc2', 'svm', 'classifier'};
 

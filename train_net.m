@@ -1,9 +1,10 @@
+num = 50;
 % use sample_loader
-city = sample_loader(cm_all_data, cm_city, randperm(length(cm_city),10));
-field = sample_loader(cm_all_data, cm_field, randperm(length(cm_field),10));
-forest = sample_loader(cm_all_data, cm_forest, randi(length(cm_forest),10));
-grass = sample_loader(cm_all_data, cm_grass, randi(length(cm_grass),10));
-street = sample_loader(cm_all_data, cm_street, randi(length(cm_street),10));
+city = sample_loader(cm_all_data, cm_city, randperm(length(cm_city), num));
+field = sample_loader(cm_all_data, cm_field, randperm(length(cm_field), num));
+forest = sample_loader(cm_all_data, cm_forest, randi(length(cm_forest), num));
+grass = sample_loader(cm_all_data, cm_grass, randi(length(cm_grass), num));
+street = sample_loader(cm_all_data, cm_street, randi(length(cm_street), num));
 % imshow(test_data(:,:,:,1))
 % create labels
 inputs = [{city} {field} {forest} {grass} {street}];
@@ -13,17 +14,16 @@ labels = [ [1 0 0 0 0]; ...
            [0 0 1 0 0]; ...
            [0 0 0 1 0]; ...
            [0 0 0 0 1]];
-
-% train
-est_labels_train = zeros(5,10);
-losses_train = zeros(5,10);
-for j = 1:10
-    for i = 1:5
-        inputs = [{city(:,:,:,j)} {field(:,:,:,j)} {forest(:,:,:,j)} {grass(:,:,:,j)} {street(:,:,:,j)}];
-        [myNet, est_labels_train(i,j), losses_train(i,j)]  = myNet.train(inputs(i), labels(i,:));
+labels = repmat(labels, num, 1);
+data = zeros(64,64,6,num);
+ for i = 1:num
+    for j = 1:5
+        data(:,:,:,(i-1)*5+j) = inputs{j}(:,:,:,i);
     end
 end
-
+       
+% train
+[self, est_labels_train, losses_train] = myNet.train({data}, labels);
 
 % below run propagation separately - only for testing 
 

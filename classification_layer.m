@@ -48,9 +48,8 @@ classdef classification_layer < Layer
             end
             % add regularization loss
             loss = loss + self.lambda*sum(arrayfun(@norm, self.weight_vector).^2);
-            % calculate regula
             [~, label] = max(mag_input_data);
-            output_data = loss;
+            output_data = [input_data; loss];
         end
         function [self, output_diff] = backward(self, ~)
             labels = self.known_labels;
