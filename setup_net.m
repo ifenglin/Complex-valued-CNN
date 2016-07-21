@@ -1,13 +1,13 @@
 % clear;
 % setup layers
-learning_rate = 1e-5;
-conv_layer2 = convolution_layer(5, 6, 64, 1, learning_rate);
+learning_rate = 1e-2;
+conv_layer2 = convolution_layer(5, 6, 64, 1, 1e-6);
 acti_layer2 = activation_layer('ReLU');
 pool_layer2 = pooling_layer('MAX', 3, 3);
-conv_layer3 = convolution_layer(5, 64, 96, 1, learning_rate);
-acti_layer3 = activation_layer('ReLU');
+conv_layer3 = convolution_layer(5, 64, 96, 1, 1e-4);
+acti_layer3 = activation_layer('ReLU'); 
 pool_layer3 = pooling_layer('MAX', 3, 3);
-conv_layer4 = convolution_layer(3, 96, 128, 1, learning_rate);
+conv_layer4 = convolution_layer(3, 96, 128, 1, 1e-3);
 acti_layer4 = activation_layer('ReLU');
 pool_layer4 = pooling_layer('MAX', 3, 3);
 aff_layer1 = affine_layer('ReLU', 128, 128, learning_rate);

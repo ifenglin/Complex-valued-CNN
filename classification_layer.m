@@ -25,11 +25,27 @@ classdef classification_layer < Layer
         function self = set_labels(self, labels)
             self.known_labels = labels;
         end
+        function self = set_delta(self, delta)
+            self.delta = delta;
+        end
+        function self = set_lambda(self, lambda)
+            self.lambda = lambda;
+        end
+        function self = get_delta(self, delta)
+            self.delta = delta;
+        end
+        function [delta, lambda] = get_parameters(self)
+            delta = self.delta;
+            lambda = self.lambda;
+        end
         function est_label = get_estimation(self)
             est_label = self.est_label;
         end
         function self = set_weight_vector(self, weight_vector)
             self.weight_vector = weight_vector;
+        end
+        function weight_vector = get_weight_vector(self)
+            weight_vector = self.weight_vector;
         end
         function [self, output_data, label] = forward(self, input_blob)
             labels = self.known_labels;
@@ -43,7 +59,7 @@ classdef classification_layer < Layer
             for i = 1:length(labels)
                 if i ~= true_label
                     % we implement maginitude for calculating loss
-                    loss = loss + max([0  (mag_input_data(i) - mag_input_data(true_label) + self.delta)]);
+                    loss = loss + max([0,  (mag_input_data(i) - mag_input_data(true_label) + self.delta)]);
                 end
             end
             % add regularization loss

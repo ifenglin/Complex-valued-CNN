@@ -1,4 +1,4 @@
-num = 50;
+num = 10;
 % use sample_loader
 city = sample_loader(cm_all_data, cm_city, randperm(length(cm_city), num));
 field = sample_loader(cm_all_data, cm_field, randperm(length(cm_field), num));
@@ -15,7 +15,7 @@ labels = [ [1 0 0 0 0]; ...
            [0 0 0 1 0]; ...
            [0 0 0 0 1]];
 labels = repmat(labels, num, 1);
-data = zeros(64,64,6,num);
+data = zeros(64,64,6,5*num);
  for i = 1:num
     for j = 1:5
         data(:,:,:,(i-1)*5+j) = inputs{j}(:,:,:,i);
@@ -23,7 +23,10 @@ data = zeros(64,64,6,num);
 end
        
 % train
-[self, est_labels_train, losses_train] = myNet.train({data}, labels);
+[myNet, est_labels_train, res] = myNet.train({data}, labels);
+train_svm = res(:,1:5);
+train_mag_svm = arrayfun(@norm,result_svm);
+train_loss = res(:,6);
 
 % below run propagation separately - only for testing 
 

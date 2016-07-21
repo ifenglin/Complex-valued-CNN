@@ -19,8 +19,8 @@ classdef affine_layer < Layer
             self.ReLU = ReLU;
             self.num_input = num_input;
             self.num = num;
-            rand_unit_real = rand(num_input, num) - 0.5;
-            rand_unit_imag = rand(num_input, num) - 0.5;
+            rand_unit_real = ones(num_input, num);
+            rand_unit_imag = ones(num_input, num);
             self.units = complex(rand_unit_real, rand_unit_imag);
             rand_bias_real = zeros(num, 1);
             rand_bias_imag = zeros(num, 1);
@@ -57,12 +57,34 @@ classdef affine_layer < Layer
             input_diff = reshape(input_blob.get_diff(), self.num, 1);
             output_diff = reshape(conj(permute(self.units, [2 1]))' * input_diff, 1, 1, self.num_input);
             
+            % calculate gradients of weights and bias respetively
             gradients_per_weights = input_diff * conj(permute(self.forward_input_data, [2 1]));
             gradients_per_bias = input_diff .* self.bias;
+            
             % replicate input data by num
             forward_input_data_array = repmat(self.forward_input_data, 1, self.num); 
-            self.units = self.units - self.alpha * ( forward_input_data_array .* gradients_per_weights' );
-            self.bias = self.bias - self.alpha * gradients_per_bias;
+            units_new = self.units - self.alpha * ( forward_input_data_array .* gradients_per_weights' );
+            % limit the value of weights in
+            % [sqrt(num), sqrt(num)]
+            % compare in real value domain
+            limit_units = ones(size(units_new))*sqrt(self.num);  
+            units_real = real(units_new);
+            units_imag = imag(units_new);
+            units_real = max(min(units_real, limit_units), -limit_units);
+            units_imag = max(min(units_imag, limit_units), -limit_units);
+            self.units = complex(units_real, units_imag);
+             
+            bias_new = self.bias - self.alpha * gradients_per_bias;
+            % limit the value of bias in
+            % [sqrt(num), sqrt(num)]
+            % compare in real value domain
+            limit_bias = ones(size(bias_new))*sqrt(self.num);  
+            bias_real = real(bias_new);
+            bias_imag = imag(bias_new);
+            bias_real = max(min(bias_real, limit_bias), -limit_bias);
+            bias_imag = max(min(bias_imag, limit_bias), -limit_bias);
+            self.bias = complex(bias_real, bias_imag);
+            
             % replicate into num_outputs by num_inputs
             %forward_input_data_array = repmat(self.forward_input_data, 1, self.num);
             %gradients_array = repmat(gradients_per_unit, 1, self.num_input)';
@@ -74,6 +96,7 @@ classdef affine_layer < Layer
             %output_blob = input_blob.set_diff(output_data);
         end
     end
+    % below is obsoleted owing to new findings
     methods (Access = private)
         function output = activate(self, input)
             switch self.ReLU
