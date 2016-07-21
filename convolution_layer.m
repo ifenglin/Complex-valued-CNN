@@ -65,7 +65,7 @@ classdef convolution_layer < Layer
                         sum(sum(patch_array .* self.kernels, 1 ),2 )...
                     );    
                     %output_depth is 1 by 1 by num_group by num_output
-                    output_data(i, j, :) = sum(output_depth) + self.bias;
+                    output_data(i, j, :) = reshape(sum(output_depth),self.num_output,1) + self.bias;
                 end
             end
             % output_blob = input_blob.set_data(output_data);
@@ -76,16 +76,11 @@ classdef convolution_layer < Layer
             output_diff = complex(zeros(size(self.forwarded_input_data)));  % the size of output data is the expended dimensions by num_output
             % calculate the additional pixels needed for de-convolute on the
             % boundaries
-            pad = complex(zeros(size(self.forwarded_input_data)));
-            %pad = complex( zeros(input_blob.get_height() + self.kernel_size + 1, ...
-            %            input_blob.get_width() + self.kernel_size + 1, ...
-            %            self.num_output), 0);
+            pad = complex(zeros(height, width, self.num_output), 0);
             pad(floor(self.kernel_size-1)/2 + 1: input_blob.get_height() + floor(self.kernel_size-1)/2, ...
                 floor(self.kernel_size-1)/2 + 1: input_blob.get_width() +  floor(self.kernel_size-1)/2, ...
                  :) = complex(input_blob.get_diff());
             % index of the left top corner of a patch in pad
-            % x = 1:self.stride:input_blob.get_height()  + (self.stride * self.kernel_size) - 1;
-            % y = 1:self.stride:input_blob.get_width()  + (self.stride * self.kernel_size) - 1;
             x = 1:self.stride:height - self.kernel_size + 1;
             y = 1:self.stride:width - self.kernel_size + 1;
             for i = 1:length(x)
@@ -127,7 +122,7 @@ classdef convolution_layer < Layer
                     % sum all feature maps as output at (i, j)
                     output_diff(x(i):x(i)+self.kernel_size - 1, y(j):y(j)+self.kernel_size - 1, :) = ...
                         output_diff(x(i):x(i)+self.kernel_size - 1, y(j):y(j)+self.kernel_size - 1, :) + ...
-                        sum(sum(sum(pad_array, 1), 2), 4 );
+                        sum(pad_array, 4);
                 end
             end
             
