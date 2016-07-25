@@ -73,12 +73,14 @@ classdef convolution_layer < Layer
         function [self, output_diff] = backward(self, input_blob)
             height = size(self.forwarded_input_data, 1);
             width = size(self.forwarded_input_data, 2);
+            height_diff = size(input_blob.get_diff(),1);
+            width_diff = size(input_blob.get_diff(),2);
             output_diff = complex(zeros(size(self.forwarded_input_data)));  % the size of output data is the expended dimensions by num_output
             % calculate the additional pixels needed for de-convolute on the
             % boundaries
             pad = complex(zeros(height, width, self.num_output), 0);
-            pad(floor(self.kernel_size-1)/2 + 1: input_blob.get_height() + floor(self.kernel_size-1)/2, ...
-                floor(self.kernel_size-1)/2 + 1: input_blob.get_width() +  floor(self.kernel_size-1)/2, ...
+            pad(floor(self.kernel_size-1)/2 + 1: height_diff + floor(self.kernel_size-1)/2, ...
+                floor(self.kernel_size-1)/2 + 1: width_diff +  floor(self.kernel_size-1)/2, ...
                  :) = complex(input_blob.get_diff());
             % index of the left top corner of a patch in pad
             x = 1:self.stride:height - self.kernel_size + 1;
