@@ -1,13 +1,13 @@
 %% run setup_net.m first
-num = 100;
+num = 10;
 size = 16;
 num_labels = 5;
 % use sample_loader
-city = sample_loader(cm_all_data, cm_city, randperm(length(cm_city), num), size);
-field = sample_loader(cm_all_data, cm_field, randperm(length(cm_field), num), size);
-forest = sample_loader(cm_all_data, cm_forest, randi(length(cm_forest), num), size);
-grass = sample_loader(cm_all_data, cm_grass, randi(length(cm_grass), num), size);
-street = sample_loader(cm_all_data, cm_street, randi(length(cm_street), num), size);
+city   = sample_loader(cm_all_data, cm_city,   randperm(length(cm_city),   num), size);
+field  = sample_loader(cm_all_data, cm_field,  randperm(length(cm_field),  num), size);
+forest = sample_loader(cm_all_data, cm_forest, randperm(length(cm_forest), num), size);
+grass  = sample_loader(cm_all_data, cm_grass,  randperm(length(cm_grass),  num), size);
+street = sample_loader(cm_all_data, cm_street, randperm(length(cm_street), num), size);
 % imshow(test_data(:,:,:,1))
 % create labels
 inputs = [{city} {field} {forest} {grass} {street}];

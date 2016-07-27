@@ -5,9 +5,17 @@
 data_real = ones(16, 16, 6);
 data_imag = ones(16, 16, 6);
 
+%% get some actual data from the collection
+nums = randperm(length(cm_city));
+nums = randperm(nums);
+test_data = sample_loader(cm_all_data, cm_city, nums(1:100));
+
+data_real = real(test_data(:,:,:,10));
+data_imag = imag(test_data(:,:,:,10));
+
 %% for convolution, activation, and pooling layers
 % uncommment one of the line to test
-myLayer = convolution_layer(5, 6, 1, 1, 0.01);
+myLayer = convolution_layer(5, 6, 24, 1, 0.01);
 % myLayer = activation_layer('ReLU');
 % myLayer = pooling_layer('MAX', 3, 3);
 
@@ -29,7 +37,8 @@ myLayer = convolution_layer(5, 6, 1, 1, 0.01);
 data =  complex(data_real, data_imag);
 myBlob = Blob(data);
 [myLayer, res_forward] = myLayer.forward(myBlob);
-disp(res_forward)
+disp(res_forward);
+imshow(res_forward(:,:,1))
 
 %% for classifier, uncomment this block to show the estimated label
 % [myLayer, res_forward, est_label] = myLayer.forward(myBlob);
