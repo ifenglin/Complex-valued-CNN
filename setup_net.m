@@ -29,7 +29,7 @@ class_layer = classification_layer('Magnitude', 5, 1e-1, 0);
 %layer_vec = [conv_layer2 acti_layer2 pool_layer2 conv_layer3 acti_layer3 pool_layer3 conv_layer4 acti_layer4 pool_layer4 aff_layer1 aff_layer2 svm class_layer];
 %layer_names = {'conv2', 'activation2' ,'pooling2', 'conv3', 'activation3' ,'pooling3', 'conv4', 'activation4' ,'pooling4', 'fc1', 'fc2', 'svm', 'classifier'};
 layer_vec = [conv_layer3 acti_layer3 pool_layer3 conv_layer4 acti_layer4 pool_layer4 aff_layer1 aff_layer2 svm class_layer];
-layer_names = {'conv3', 'activation3' ,'pooling3', 'conv4', 'activation4' ,'pooling4', 'fc1', 'fc2', 'svm', 'classifier'};
+layer_names = {'conv-1', 'act-1' ,'pool-1', 'conv-2', 'act-2' ,'pool-2', 'fc1', 'fc2', 'svm', 'classifier'};
 
 
 %% setup blobs automatically - don't change here

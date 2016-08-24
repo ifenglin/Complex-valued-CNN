@@ -26,12 +26,12 @@ classdef convolution_layer < Layer
             % Note : weights in kernels and bias shares the same parameters 
             % at different locations in the image.
             % initialize kernels 
-            rand_kernels_real = ones(kernel_size, kernel_size, group, num_output );
-            rand_kernels_imag = ones(kernel_size, kernel_size, group, num_output );
+            rand_kernels_real = rand(kernel_size, kernel_size, group, num_output)*2 - 1;
+            rand_kernels_imag = rand(kernel_size, kernel_size, group, num_output)*2 - 1;
             self.kernels = complex(rand_kernels_real, rand_kernels_imag);
             % initialize bias
-            rand_bias_real = zeros(num_output, 1);
-            rand_bias_imag = zeros(num_output, 1);
+            rand_bias_real = ones(num_output, 1);
+            rand_bias_imag = ones(num_output, 1);
             self.bias = complex(rand_bias_real, rand_bias_imag);
             self.alpha = alpha;
             self.kernels_delta = complex(zeros(size(self.kernels)));

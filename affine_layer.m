@@ -21,8 +21,8 @@ classdef affine_layer < Layer
             self.ReLU = ReLU;
             self.num_input = num_input;
             self.num = num;
-            rand_unit_real = ones(num_input, num);
-            rand_unit_imag = ones(num_input, num);
+            rand_unit_real = rand(num_input, num)*2 - 1;
+            rand_unit_imag = rand(num_input, num)*2 - 1;
             self.units = complex(rand_unit_real, rand_unit_imag);
             rand_bias_real = zeros(num, 1);
             rand_bias_imag = zeros(num, 1);
