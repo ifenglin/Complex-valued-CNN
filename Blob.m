@@ -54,6 +54,9 @@ classdef Blob
         function channels = get_num_channels(self)
             channels = size(self.data, 3);
         end
+        function num = get_num(self)
+            num = size(self.data, 4);
+        end
         function self = set_labels(self, labels)
             self.labels = labels;
         end

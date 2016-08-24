@@ -3,14 +3,16 @@ classdef convolution_layer < Layer
     %   Detailed explanation goes here
     
     properties (Access = private)
-        num_output  % number of filters
-        kernel_size % filter size in pixels (squared)
-        num_group   % number of groups/channels 
-        stride      % number of pixels to step between each filter application
-        kernels
-        bias
-        alpha       % learning rate
+        num_output       % number of filters
+        kernel_size      % filter size in pixels (squared)
+        num_group        % number of groups/channels 
+        stride           % number of pixels to step between each filter application
+        kernels          % weights
+        bias            
+        alpha            % learning rate
         forwarded_input_data  % keep a copy for weight update
+        kernels_delta    % updated weights to apply when updating
+        bias_delta       % updated bias to apply when updating
     end
     
     methods
@@ -25,13 +27,15 @@ classdef convolution_layer < Layer
             % at different locations in the image.
             % initialize kernels 
             rand_kernels_real = ones(kernel_size, kernel_size, group, num_output );
-            rand_kernels_imag = zeros(kernel_size, kernel_size, group, num_output );
+            rand_kernels_imag = ones(kernel_size, kernel_size, group, num_output );
             self.kernels = complex(rand_kernels_real, rand_kernels_imag);
             % initialize bias
             rand_bias_real = zeros(num_output, 1);
             rand_bias_imag = zeros(num_output, 1);
             self.bias = complex(rand_bias_real, rand_bias_imag);
             self.alpha = alpha;
+            self.kernels_delta = complex(zeros(size(self.kernels)));
+            self.bias_delta = complex(zeros(size(self.bias)));
         end
         function kernels = get_weights(self)
             kernels = self.kernels;
@@ -75,7 +79,8 @@ classdef convolution_layer < Layer
             width = size(self.forwarded_input_data, 2);
             height_diff = size(input_blob.get_diff(),1);
             width_diff = size(input_blob.get_diff(),2);
-            output_diff = complex(zeros(size(self.forwarded_input_data)));  % the size of output data is the expended dimensions by num_output
+            % the size of output data is the expended dimensions by num_output
+            output_diff = complex(zeros(size(self.forwarded_input_data)));  
             % calculate the additional pixels needed for de-convolute on the
             % boundaries
             pad = complex(zeros(height, width, self.num_output), 0);
@@ -97,6 +102,7 @@ classdef convolution_layer < Layer
                         [1 2 4 3]);
                     forwarded_input_data_array = repmat(self.forwarded_input_data(x:x+self.kernel_size - 1, y:y+self.kernel_size - 1, :), [1, 1, 1, self.num_output]);
                     
+                    
                     kernels_new = self.kernels - self.alpha * forwarded_input_data_array .* pad_array;
                     % limit the value of weights in
                     % [sqrt(num_output), sqrt(num_output)]
@@ -106,11 +112,11 @@ classdef convolution_layer < Layer
                     kernels_imag = imag(kernels_new);
                     kernels_real = max(min(kernels_real, limit_kernels), -limit_kernels);
                     kernels_imag = max(min(kernels_imag, limit_kernels), -limit_kernels);
-                    self.kernels = complex(kernels_real, kernels_imag);
+                    self.kernels_delta = self.kernels_delta + complex(kernels_real, kernels_imag);
                     
                     % update bias with the sum in a pad 
                     bias_new = self.bias - self.alpha * ...
-                        reshape(sum(sum(pad(x:x+self.kernel_size - 1, y:y+self.kernel_size - 1, :) ) ),self.num_output, 1 );
+                       reshape(sum(sum(pad(x:x+self.kernel_size - 1, y:y+self.kernel_size - 1, :) ) ),self.num_output, 1 );
                     % limit the value of bias in
                     % [sqrt(num_output), sqrt(num_output)]
                     % compare in real value domain
@@ -119,7 +125,7 @@ classdef convolution_layer < Layer
                     bias_imag = imag(bias_new);
                     bias_real = max(min(bias_real, limit_bias), -limit_bias);
                     bias_imag = max(min(bias_imag, limit_bias), -limit_bias);
-                    self.bias = complex(bias_real, bias_imag);
+                    self.bias_delta = self.bias_delta + complex(bias_real, bias_imag);
                     
                     % sum all feature maps as output at (i, j)
                     output_diff(x(i):x(i)+self.kernel_size - 1, y(j):y(j)+self.kernel_size - 1, :) = ...
@@ -127,9 +133,15 @@ classdef convolution_layer < Layer
                         sum(pad_array, 4);
                 end
             end
-            
-           
+
             % output_blob = input_blob.set_diff(output_data);
+        end
+        
+        function self = update(self)
+            self.kernels = self.kernels + self.kernels_delta;
+            self.bias = self.bias + self.bias_delta;
+            self.kernels_delta = complex(zeros(size(self.kernels)));
+            self.bias_delta = complex(zeros(size(self.bias))); 
         end
     end
     

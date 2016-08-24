@@ -49,11 +49,13 @@ classdef Net
             losses = zeros(num, 6);
             
             for i = 1:num 
-                disp(sprintf('#### Train image %d ####\n', i));
+                disp(sprintf('#### Train image %d out of %d ####\n', i, num));
                 [self, est_labels(i), res] = self.forward({input_data{:}(:,:,:,i)} , labels(i,:));
                 losses(i,:) = res.get_data();
                 self = self.backward();
             end
+            self = self.update();
+            disp('#### Weights are updated. Training ends. ####\n');
         end
         
         function [est_labels, losses] = test(self, input_data, labels)
@@ -69,10 +71,16 @@ classdef Net
             end
         end
         
+        function self = update(self)
+            for i = 1:length(self.layer_vec)
+                self.layer_vec(i) = self.layer_vec(i).update();
+            end
+        end
+        
         
         function [self, est_label, res] = forward(self, input_data, labels)
             % copy data to input blobs
-            disp('Forward Propagation');
+            disp('#Forward Propagation#');
             for n = 1:length(self.inputs)
                 self.blob_vec(self.name2blob_index(self.inputs{n})) = ...
                     self.blob_vec(self.name2blob_index(self.inputs{n})).set_data(input_data{n});
@@ -86,7 +94,7 @@ classdef Net
             % acummualte weight vector for classifier
             weight_vector = [];
             for i = 1:length(self.layer_vec)
-                disp(self.layer_names(i));
+                disp(char(self.layer_names(i)));
                 %tic
                 if ~strcmp(self.layer_vec(i).get_type(), 'classification')
                     [self.layer_vec(i), data] = self.layer_vec(i).forward(self.blob_vec(i));
@@ -111,7 +119,7 @@ classdef Net
             end
         end
         function [self, res] = backward(self, input_diff)
-            disp('Backward Propagation');
+            disp('#Backward Propagation#');
             % copy diff to output blobs
             if nargin > 1
                 for n = 1:length(self.outputs)
@@ -126,7 +134,7 @@ classdef Net
             % the number of blobs 
             assert(length(self.layer_vec) == length(self.blob_vec)-1);
             for i = fliplr(1:length(self.layer_vec))
-                disp(self.layer_names(i));
+                disp(char(self.layer_names(i)));
                 %tic
                 [self.layer_vec(i), diff] = self.layer_vec(i).backward(self.blob_vec(i+1));
                 self.blob_vec(i) = self.blob_vec(i).set_diff(diff);

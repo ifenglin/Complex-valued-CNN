@@ -11,6 +11,8 @@ classdef affine_layer < Layer
         alpha              % learning rate
         forward_input_data % for parameter update
         forward_sum        % for gradient calculation
+        units_delta        % updated weights to apply when updating
+        bias_delta         % updated bias to apply when updating
     end 
     
     methods (Access = public)
@@ -26,6 +28,8 @@ classdef affine_layer < Layer
             rand_bias_imag = zeros(num, 1);
             self.bias = complex(rand_bias_real, rand_bias_imag);
             self.alpha = alpha;
+            self.units_delta = complex(zeros(size(self.units)));
+            self.bias_delta = complex(zeros(size(self.bias)));
         end
         function units = get_weights(self)
             units = self.units;
@@ -72,7 +76,8 @@ classdef affine_layer < Layer
             units_imag = imag(units_new);
             units_real = max(min(units_real, limit_units), -limit_units);
             units_imag = max(min(units_imag, limit_units), -limit_units);
-            self.units = complex(units_real, units_imag);
+            self.units_delta = self.units_delta + complex(units_real, units_imag);
+            
              
             bias_new = self.bias - self.alpha * gradients_per_bias;
             % limit the value of bias in
@@ -83,7 +88,7 @@ classdef affine_layer < Layer
             bias_imag = imag(bias_new);
             bias_real = max(min(bias_real, limit_bias), -limit_bias);
             bias_imag = max(min(bias_imag, limit_bias), -limit_bias);
-            self.bias = complex(bias_real, bias_imag);
+            self.bias_delta = self.bias_delta + complex(bias_real, bias_imag);
             
             % replicate into num_outputs by num_inputs
             %forward_input_data_array = repmat(self.forward_input_data, 1, self.num);
@@ -94,6 +99,13 @@ classdef affine_layer < Layer
             %self.bias = self.bias - self.alpha * gradients_per_unit;
             %output_diff = reshape(gradients_per_unit, 1, 1, self.num);
             %output_blob = input_blob.set_diff(output_data);
+        end
+        
+        function self = update(self)
+            self.units = self.units + self.units_delta;
+            self.bias = self.bias + self.bias_delta;
+            self.units_delta = complex(zeros(size(self.units)));
+            self.bias_delta = complex(zeros(size(self.bias))); 
         end
     end
     % below is obsoleted owing to new findings
