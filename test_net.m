@@ -23,12 +23,11 @@ data = zeros(size,size,6,num);
 end
 [~, true_labels] = max(labels,[],2);
 % test
-[result_est_labels_test, res]  = myNet.test({data}, labels);
-result_svm = res(:,1:5);
-result_mag_svm = arrayfun(@norm,result_svm);
-result_loss = res(:,6);
-result_correctness = result_est_labels_test == true_labels;
-result_correctness_rate = sum(result_correctness) / (num*5);
+[test_est_labels, loss]  = myNet.test({data}, labels);
+test_errors = loss;
+test_loss = min(loss, [], 2);
+test_correctness = test_est_labels == true_labels;
+test_correctness_rate = sum(test_correctness) / (num*5);
 
 %% another style of testing
 % can be useful in mini-batch-training

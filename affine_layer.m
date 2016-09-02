@@ -67,28 +67,30 @@ classdef affine_layer < Layer
             
             % replicate input data by num
             forward_input_data_array = repmat(self.forward_input_data, 1, self.num); 
-            units_new = self.units - self.alpha * ( forward_input_data_array .* gradients_per_weights' );
+            self.units_delta = self.units_delta - self.alpha * ( forward_input_data_array .* gradients_per_weights' );
             % limit the value of weights in
             % [sqrt(num), sqrt(num)]
             % compare in real value domain
-            limit_units = ones(size(units_new))*sqrt(self.num);  
-            units_real = real(units_new);
-            units_imag = imag(units_new);
-            units_real = max(min(units_real, limit_units), -limit_units);
-            units_imag = max(min(units_imag, limit_units), -limit_units);
-            self.units_delta = self.units_delta + complex(units_real, units_imag);
+            %units_new = self.units - self.alpha * ( forward_input_data_array .* gradients_per_weights' );
+            %limit_units = ones(size(units_new))*sqrt(self.num);  
+            %units_real = real(units_new);
+            %units_imag = imag(units_new);
+            %units_real = max(min(units_real, limit_units), -limit_units);
+            %units_imag = max(min(units_imag, limit_units), -limit_units);
+            %self.units_delta = self.units_delta + complex(units_real, units_imag) - self.units;
             
              
-            bias_new = self.bias - self.alpha * gradients_per_bias;
+            self.bias_delta = self.bias_delta - self.alpha * gradients_per_bias;
             % limit the value of bias in
             % [sqrt(num), sqrt(num)]
             % compare in real value domain
-            limit_bias = ones(size(bias_new))*sqrt(self.num);  
-            bias_real = real(bias_new);
-            bias_imag = imag(bias_new);
-            bias_real = max(min(bias_real, limit_bias), -limit_bias);
-            bias_imag = max(min(bias_imag, limit_bias), -limit_bias);
-            self.bias_delta = self.bias_delta + complex(bias_real, bias_imag);
+            %bias_new = self.bias - self.alpha * gradients_per_bias;
+            %limit_bias = ones(size(bias_new))*sqrt(self.num);  
+            %bias_real = real(bias_new);
+            %bias_imag = imag(bias_new);
+            %bias_real = max(min(bias_real, limit_bias), -limit_bias);
+            %bias_imag = max(min(bias_imag, limit_bias), -limit_bias);
+            %self.bias_delta = self.bias_delta + complex(bias_real, bias_imag) - self.bias;
             
             % replicate into num_outputs by num_inputs
             %forward_input_data_array = repmat(self.forward_input_data, 1, self.num);

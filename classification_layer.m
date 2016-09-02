@@ -47,52 +47,43 @@ classdef classification_layer < Layer
         function weight_vector = get_weight_vector(self)
             weight_vector = self.weight_vector;
         end
-        function [self, output_data, label] = forward(self, input_blob)
-            labels = self.known_labels;
+        function [self, output_data, label, loss] = forward(self, input_blob)
             input_data = input_blob.get_data();
             self.forward_input_data = input_data;
             assert(length(input_blob.get_data()) == self.num)
-            assert(length(labels) == self.num)
-            loss = 0;
-            [~, true_label] = max(labels);
-            %mag_input_data = arrayfun(@norm, input_data);
-            mysigma = zeros(length(labels), 1);
-            for i = 1:length(labels)
-                if i ~= true_label
-                    % magnitude error function
-                    %loss = loss + max([0,  (mag_input_data(i) - mag_input_data(true_label) + self.delta)]);
-                    % complex quadratic error function
-                    mysigma(i) = input_data(true_label) - input_data(i);
-                    loss = loss + max([0, 1/2 * mysigma(i)* conj(mysigma(i)) + self.delta]);
+            loss = zeros(self.num, 1);
+            for i = 1:self.num % calculate the loss for label i
+                for j = 1:self.num % calculate the contribution from input j
+                    if i ~= j % 0 if i == j
+                        % complex quadratic error functionf
+                        mysigma = input_data(i) - input_data(j);
+                        loss(i) = loss(i) + max([0, 1/2 * mysigma* conj(mysigma) - self.delta]);
+                    end
                 end
             end
             % add regularization loss
             loss = loss + self.lambda * sum(arrayfun(@norm, self.weight_vector).^2);
             % find estimated label
             %[~, label] = max(mag_input_data);
-            [~, label] = max(mysigma);
-            output_data = [input_data; loss];
+            [min_loss, label] = min(loss);
+            output_data = [input_data; min_loss];
         end
         function [self, output_diff] = backward(self, ~)
             labels = self.known_labels;
             input_data = self.forward_input_data;
             assert(length(input_data) == self.num)
             assert(length(labels) == self.num)
+            true_label = find(labels == 1);
             output_diff = zeros(self.num, 1);
-            [~, true_label] = max(labels);
-            %mag_input_data = arrayfun(@norm, input_data);
             mysigma = zeros(length(labels), 1);
             false_positive_count = 0;
             % calculate the gradient for the unit corresponding to false label
             for i = 1:length(labels)
                 if i ~= true_label
-                    % we implement maginitude for calculating loss
-                    %if (mag_input_data(i) - mag_input_data(true_label) + self.delta) > 0
                     mysigma(i) = input_data(true_label) - input_data(i);
-                    if (mysigma(i)* conj(mysigma(i)) + self.delta) > 0
+                    if (mysigma(i)* conj(mysigma(i)) - self.delta) > 0 % otherwise diff is zero
                         false_positive_count = false_positive_count + 1;
                         output_diff(i) = input_data(i); 
-                        % otherwise diff is zero
                     end
                 end
             end
