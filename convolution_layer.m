@@ -106,7 +106,7 @@ classdef convolution_layer < Layer
                     forwarded_input_data_array = repmat(self.forwarded_input_data(x:x+self.kernel_size - 1, y:y+self.kernel_size - 1, :), [1, 1, 1, self.num_output]);
                     
                     
-                    self. kernels_delta = self. kernels_delta - self.alpha * (forwarded_input_data_array .* pad_array);
+                    self.kernels_delta = self.kernels_delta + self.alpha * (forwarded_input_data_array .* pad_array);
                     % limit the value of weights in
                     % [sqrt(num_output), sqrt(num_output)]
                     % compare in real value domain
@@ -119,7 +119,7 @@ classdef convolution_layer < Layer
                     %self.kernels_delta = self.kernels_delta + complex(kernels_real, kernels_imag) - self.kernels;
                     
                     % update bias with the sum in a pad 
-                    self.bias_delta = self.bias_delta - self.alpha * ...
+                    self.bias_delta = self.bias_delta + self.alpha * ...
                        reshape(sum(sum(pad(x:x+self.kernel_size - 1, y:y+self.kernel_size - 1, :) ) ),self.num_output, 1 );
                     % limit the value of bias in
                     % [sqrt(num_output), sqrt(num_output)]

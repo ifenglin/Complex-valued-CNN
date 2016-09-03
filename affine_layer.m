@@ -67,7 +67,7 @@ classdef affine_layer < Layer
             
             % replicate input data by num
             forward_input_data_array = repmat(self.forward_input_data, 1, self.num); 
-            self.units_delta = self.units_delta - self.alpha * ( forward_input_data_array .* gradients_per_weights' );
+            self.units_delta = self.units_delta + self.alpha * ( forward_input_data_array .* gradients_per_weights' );
             % limit the value of weights in
             % [sqrt(num), sqrt(num)]
             % compare in real value domain
@@ -80,7 +80,7 @@ classdef affine_layer < Layer
             %self.units_delta = self.units_delta + complex(units_real, units_imag) - self.units;
             
              
-            self.bias_delta = self.bias_delta - self.alpha * gradients_per_bias;
+            self.bias_delta = self.bias_delta + self.alpha * gradients_per_bias;
             % limit the value of bias in
             % [sqrt(num), sqrt(num)]
             % compare in real value domain
