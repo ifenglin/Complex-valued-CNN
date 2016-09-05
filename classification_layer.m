@@ -57,10 +57,10 @@ classdef classification_layer < Layer
                     if i ~= j 
                         % complex quadratic error function
                         mysigma = complex(0,0) - input_data(j);
-                        loss(i) = loss(i) + max([0, 1/2 * mysigma* conj(mysigma) - self.delta]);
+                        loss(i) = loss(i) + max([0, 1/2 * (mysigma* conj(mysigma))^2 - self.delta]);
                     else
                         mysigma = complex(1,1) - input_data(j);
-                        loss(i) = loss(i) + max([0, 1/2 * mysigma* conj(mysigma) - self.delta]);
+                        loss(i) = loss(i) + max([0, 1/2 * (mysigma* conj(mysigma))^2 - self.delta]);
                     end
                 end
             end
@@ -77,25 +77,29 @@ classdef classification_layer < Layer
         function [self, output_diff] = backward(self, ~)
             labels = self.known_labels;
             input_data = self.forward_input_data;
+            % check dimensions
             assert(length(input_data) == self.num)
             assert(length(labels) == self.num)
+            % set true label
             true_label = find(labels == 1);
             labels = complex(labels, labels);
+            % initialize variable
             output_diff = zeros(self.num, 1);
             mysigma = zeros(length(labels), 1);
             false_positive_count = 0;
             % calculate the gradient for the unit corresponding to false label
             for i = 1:length(labels)
-                if i ~= true_label
+                %if i ~= true_label
                     mysigma(i) = labels(i) - input_data(i);
                     if (1/2 * mysigma(i)* conj(mysigma(i)) - self.delta) > 0 % otherwise diff is zero
-                        false_positive_count = false_positive_count + 1;
-                        output_diff(i) = 1/2 * conj(input_data(i)); 
+                        %false_positive_count = false_positive_count + 1;
+                        %output_diff(i) = 1/2 * conj(input_data(i)); 
+                        output_diff(i) = 2 * input_data(i) * conj(input_data(i))^2;
                     end
-                end
+                %end
             end
             % calculate the gradient for the unit corresponding to true label
-            output_diff(true_label) = -1/2 * false_positive_count * conj(input_data(true_label));
+            %output_diff(true_label) = -1/2 * false_positive_count * conj(input_data(true_label));
             
             % add gradient of regularization loss
             output_diff = output_diff + 2*self.lambda*sum(self.weight_vector);

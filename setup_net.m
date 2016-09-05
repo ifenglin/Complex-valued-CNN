@@ -15,10 +15,10 @@ learning_rate = 1e-4;
 %acti_layer2 = activation_layer('ReLU');
 %pool_layer2 = pooling_layer('MAX', 3, 3);
 
-conv_layer3 = convolution_layer(3, 6, 32, 1, learning_rate*1e-4);
-acti_layer3 = activation_layer('ReLU'); 
+conv_layer3 = convolution_layer(3, 6, 32, 1, learning_rate*1e-2);
+acti_layer3 = activation_layer('ReLU');
 pool_layer3 = pooling_layer('MAX', 3, 3);
-conv_layer4 = convolution_layer(3, 32, 128, 1, learning_rate*1e-2);
+conv_layer4 = convolution_layer(3, 32, 128, 1, learning_rate*1e-1);
 acti_layer4 = activation_layer('ReLU');
 pool_layer4 = pooling_layer('MAX', 3, 3);
 aff_layer1 = affine_layer('ReLU', 128, 128, learning_rate);
@@ -38,6 +38,5 @@ for i=1:length(layer_vec)+1
     blob_vec(i) = Blob();
     blob_names{i} =  sprintf('Blob%d',i);
 end
-
 %% setup net
 myNet = Net(layer_vec, blob_vec, layer_names, blob_names, [1], [length(blob_vec)]);

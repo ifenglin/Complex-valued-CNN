@@ -26,12 +26,13 @@ classdef convolution_layer < Layer
             % Note : weights in kernels and bias shares the same parameters 
             % at different locations in the image.
             % initialize kernels 
-            rand_kernels_real = rand(kernel_size, kernel_size, group, num_output)*2 - 1;
-            rand_kernels_imag = rand(kernel_size, kernel_size, group, num_output)*2 - 1;
+            num_inputs_per_kernel = kernel_size * kernel_size;
+            rand_kernels_real = normrnd(0, 1, kernel_size, kernel_size, group, num_output)*sqrt(2.0/(num_inputs_per_kernel*group));
+            rand_kernels_imag = normrnd(0, 1, kernel_size, kernel_size, group, num_output)*sqrt(2.0/(num_inputs_per_kernel*group));
             self.kernels = complex(rand_kernels_real, rand_kernels_imag);
             % initialize bias
-            rand_bias_real = ones(num_output, 1);
-            rand_bias_imag = ones(num_output, 1);
+            rand_bias_real = zeros(num_output, 1);
+            rand_bias_imag = zeros(num_output, 1);
             self.bias = complex(rand_bias_real, rand_bias_imag);
             self.alpha = alpha;
             self.kernels_delta = complex(zeros(size(self.kernels)));
@@ -107,32 +108,11 @@ classdef convolution_layer < Layer
                     
                     
                     self.kernels_delta = self.kernels_delta + self.alpha * (forwarded_input_data_array .* pad_array);
-                    % limit the value of weights in
-                    % [sqrt(num_output), sqrt(num_output)]
-                    % compare in real value domain
-                    %kernels_new = self.kernels - self.alpha * (forwarded_input_data_array .* pad_array);
-                    %limit_kernels = ones(size(kernels_new))*sqrt(self.num_output);  
-                    %kernels_real = real(kernels_new);
-                    %kernels_imag = imag(kernels_new);
-                    %kernels_real = max(min(kernels_real, limit_kernels), -limit_kernels);
-                    %kernels_imag = max(min(kernels_imag, limit_kernels), -limit_kernels);
-                    %self.kernels_delta = self.kernels_delta + complex(kernels_real, kernels_imag) - self.kernels;
                     
                     % update bias with the sum in a pad 
                     self.bias_delta = self.bias_delta + self.alpha * ...
                        reshape(sum(sum(pad(x:x+self.kernel_size - 1, y:y+self.kernel_size - 1, :) ) ),self.num_output, 1 );
-                    % limit the value of bias in
-                    % [sqrt(num_output), sqrt(num_output)]
-                    % compare in real value domain
-                    %bias_new = self.bias - self.alpha * ...
-                    %   reshape(sum(sum(pad(x:x+self.kernel_size - 1, y:y+self.kernel_size - 1, :) ) ),self.num_output, 1 );
-                    %limit_bias = ones(size(bias_new))*sqrt(self.num_output);  
-                    %bias_real = real(bias_new);
-                    %bias_imag = imag(bias_new);
-                    %bias_real = max(min(bias_real, limit_bias), -limit_bias);
-                    %bias_imag = max(min(bias_imag, limit_bias), -limit_bias);
-                    %self.bias_delta = self.bias_delta + complex(bias_real, bias_imag) - self.bias;
-                    
+
                     % sum all feature maps as output at (i, j)
                     output_diff(x(i):x(i)+self.kernel_size - 1, y(j):y(j)+self.kernel_size - 1, :) = ...
                         output_diff(x(i):x(i)+self.kernel_size - 1, y(j):y(j)+self.kernel_size - 1, :) + ...

@@ -42,30 +42,30 @@ classdef Net
         end
         function backward_prefilled(~)
         end
-        function [self, est_labels, loss] = train(self, input_data, labels)
+        function [self, est_labels, loss] = train(self, input_data, known_labels)
             % the 4th dimension is number of images
             num = size(input_data{:}, 4);
             est_labels = zeros(num, 1);
             loss = zeros(num, 5);
-            
             for i = 1:num 
-                disp(sprintf('#### Train image %d out of %d ####\n', i, num));
-                [self, est_labels(i), loss(i,:)] = self.forward({input_data{:}(:,:,:,i)} , labels(i,:));
+                disp(sprintf('# Train image %d out of %d #\n', i, num));
+                [self, est_labels(i), loss(i,:)] = self.forward({input_data{:}(:,:,:,i)});
                 %losses(i,:) = res.get_data();
-                self = self.backward();
+                self = self.backward(known_labels(i,:));
             end
             self = self.update();
-            disp(sprintf('#### The network is trained with %d inputs and weights are updated.####\n', num));
+            disp(sprintf('# Trained with %d inputs and updated.#\n', num));
         end
         
-        function [est_labels, loss] = test(self, input_data, labels)
+        function [est_labels, loss, output_data] = test(self, input_data, num_labels)
             % the 4th dimension is number of images
             num = size(input_data{:}, 4);
             est_labels = zeros(num, 1);
-            loss = zeros(num, size(labels, 2));
+            loss = zeros(num, num_labels);
+            output_data = zeros(num, num_labels);
             for i = 1:num 
-                disp(sprintf('#### Test image %d ####\n', i));
-                [self, est_labels(i), loss(i,:)] = self.forward({input_data{:}(:,:,:,i)} , labels(i,:));
+                disp(sprintf('# Test image %d #\n', i));
+                [self, est_labels(i), loss(i,:), output_data(i,:)] = self.forward({input_data{:}(:,:,:,i)});
             end
         end
         
@@ -76,9 +76,9 @@ classdef Net
         end
         
         
-        function [self, est_label, loss] = forward(self, input_data, labels)
+        function [self, est_label, loss, output_data] = forward(self, input_data)
             % copy data to input blobs
-            disp('#Forward Propagation#');
+            %disp('#Forward Propagation#');
             for n = 1:length(self.inputs)
                 self.blob_vec(self.name2blob_index(self.inputs{n})) = ...
                     self.blob_vec(self.name2blob_index(self.inputs{n})).set_data(input_data{n});
@@ -92,20 +92,18 @@ classdef Net
             % acummualte weight vector for classifier
             weight_vector = [];
             for i = 1:length(self.layer_vec)
-                disp(char(self.layer_names(i)));
+                %disp(char(self.layer_names(i)));
                 %tic
                 if ~strcmp(self.layer_vec(i).get_type(), 'classification')
-                    [self.layer_vec(i), data] = self.layer_vec(i).forward(self.blob_vec(i));
-                    self.blob_vec(i+1) = self.blob_vec(i+1).set_data(data);
+                    [self.layer_vec(i), output_data] = self.layer_vec(i).forward(self.blob_vec(i));
+                    self.blob_vec(i+1) = self.blob_vec(i+1).set_data(output_data);
                     weight_vector = [weight_vector; reshape(self.layer_vec(i).get_weights(), [], 1)]; %#ok<AGROW>
                 else % if classifier
-                    % assign labels to classifier
-                    self.layer_vec(i) = self.layer_vec(end).set_labels(labels);
                     % assign weight_vector to classifier
-                    self.layer_vec(i) = self.layer_vec(end).set_weight_vector(weight_vector);
+                    self.layer_vec(end) = self.layer_vec(end).set_weight_vector(weight_vector);
                     % forward and display estimated label index
-                    [self.layer_vec(i), data, est_label, loss] = self.layer_vec(i).forward(self.blob_vec(i));
-                    self.blob_vec(i+1) = self.blob_vec(i+1).set_data(data);
+                    [self.layer_vec(i), output_data, est_label, loss] = self.layer_vec(i).forward(self.blob_vec(i));
+                    self.blob_vec(i+1) = self.blob_vec(i+1).set_data(output_data);
                 end
                 %toc
             end
@@ -116,23 +114,25 @@ classdef Net
             %    res(n) = self.blobs(self.outputs{n});
             %end
         end
-        function [self, res] = backward(self, input_diff)
-            disp('#Backward Propagation#');
+        function [self] = backward(self, known_labels, input_diff)
+            %disp('#Backward Propagation#');
             % copy diff to output blobs
-            if nargin > 1
+            if nargin > 2
                 for n = 1:length(self.outputs)
                     self.blob_vec(self.name2blob_index(self.outputs{n})) = ...
                         self.blob_vec(self.name2blob_index(self.outputs{n})).set_diff(input_diff{n});
                 end
             end
-            
+            % assign labels to classifier
+            self.layer_vec(end) = self.layer_vec(end).set_labels(known_labels);
+
             % self.backward_prefilled();
             % layer i takes blob i+1 and store results in blob i
             % check the number of layers is exactly one fewer than
             % the number of blobs 
             assert(length(self.layer_vec) == length(self.blob_vec)-1);
             for i = fliplr(1:length(self.layer_vec))
-                disp(char(self.layer_names(i)));
+                %disp(char(self.layer_names(i)));
                 %tic
                 [self.layer_vec(i), diff] = self.layer_vec(i).backward(self.blob_vec(i+1));
                 self.blob_vec(i) = self.blob_vec(i).set_diff(diff);
