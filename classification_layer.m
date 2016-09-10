@@ -47,33 +47,40 @@ classdef classification_layer < Layer
         function weight_vector = get_weight_vector(self)
             weight_vector = self.weight_vector;
         end
-        function [self, output_data, est_label, loss] = forward(self, input_blob)
+        function [self, output_data, est_label, errors, loss] = forward(self, input_blob)
             input_data = input_blob.get_data();
             self.forward_input_data = input_data;
             assert(length(input_blob.get_data()) == self.num)
-            loss = zeros(self.num, 1);
+            errors = zeros(self.num, 1);
+            labels = [ 1+0i 0.309+0.9511i -0.809+0.5878i -0.809-0.5878i 0.3090-0.9511i ];
             for i = 1:self.num % calculate the loss when the true label is i
-                for j = 1:self.num % calculate the contribution from input j
-                    if i ~= j 
-                        % complex quadratic error function
-                        mysigma = complex(0,0) - input_data(j);
-                        loss(i) = loss(i) + max([0, 1/2 * (mysigma* conj(mysigma))^2 - self.delta]);
-                    else
-                        mysigma = complex(1,1) - input_data(j);
-                        loss(i) = loss(i) + max([0, 1/2 * (mysigma* conj(mysigma))^2 - self.delta]);
-                    end
-                end
+%                 for j = 1:self.num % calculate the contribution from input j
+%                     if i ~= j 
+%                         % complex quadratic error function
+%                         mysigma = complex(0,0) - input_data(j);
+%                         loss(i) = loss(i) + max([0, 1/2 * (mysigma* conj(mysigma)) - self.delta]);
+%                     else
+%                         mysigma = complex(0,0) - input_data(j);
+%                         loss(i) = loss(i) + max([0, 1/2 * (mysigma* conj(mysigma)) - self.delta]);
+%                     end
+%                 end
+                  mysigma = labels(i) - input_data(i);
+                  errors(i) = max([0, 1/2 * (mysigma* conj(mysigma)) - self.delta]);
             end
-%             for i = 1:self.num % calculate the loss for label i
-%                 mysigma = complex(1, 1) - input_data(j);
-%                 loss(i) = max([0, 1/2 * mysigma* conj(mysigma) - self.delta]);
-%             end
+            % find estimated label
+            [loss, est_label] = min(errors);
+            % calculate the total loss
+             for i = 1:self.num % calculate the loss for label i
+                 if i ~= est_label
+                     mysigma = complex(0, 0) - input_data(i);
+                     loss =  loss + max([0, 1/2 * mysigma* conj(mysigma) - self.delta]);
+                 end
+             end
             % add regularization loss
             loss = loss + self.lambda * sum(arrayfun(@norm, self.weight_vector).^2);
-            % find estimated label
-            [~, est_label] = min(loss);
             output_data = input_data;
         end
+        
         function [self, output_diff] = backward(self, ~)
             labels = self.known_labels;
             input_data = self.forward_input_data;
@@ -82,24 +89,29 @@ classdef classification_layer < Layer
             assert(length(labels) == self.num)
             % set true label
             true_label = find(labels == 1);
-            labels = complex(labels, labels);
+            %labels = complex(labels, labels);
+            labels = [ 1+0i 0.309+0.9511i -0.809+0.5878i -0.809-0.5878i 0.3090-0.9511i ] .* labels;
             % initialize variable
             output_diff = zeros(self.num, 1);
-            mysigma = zeros(length(labels), 1);
             false_positive_count = 0;
             % calculate the gradient for the unit corresponding to false label
             for i = 1:length(labels)
-                %if i ~= true_label
-                    mysigma(i) = labels(i) - input_data(i);
-                    if (1/2 * mysigma(i)* conj(mysigma(i)) - self.delta) > 0 % otherwise diff is zero
-                        %false_positive_count = false_positive_count + 1;
-                        %output_diff(i) = 1/2 * conj(input_data(i)); 
-                        output_diff(i) = 2 * input_data(i) * conj(input_data(i))^2;
+                if i ~= true_label
+                    mysigma = labels(i) - input_data(i);
+                    if (1/2 * (mysigma* conj(mysigma)) - self.delta) > 0 % otherwise diff is zero
+                        false_positive_count = false_positive_count + 1;
+                        % left-right opposite
+                        %output_diff(i) = -2 * mysigma(i) * conj(mysigma(i))^2 ; 
+                        % upside-down
+                        %output_diff(i) = -2 * mysigma(i) * conj(mysigma(i))^2 * -1;
+                        %output_diff(i) = 2 * conj( mysigma(i) * conj(mysigma(i))^2);
+                        output_diff(i) = 1/2 * mysigma ;
                     end
-                %end
+                end
             end
-            % calculate the gradient for the unit corresponding to true label
-            %output_diff(true_label) = -1/2 * false_positive_count * conj(input_data(true_label));
+            %calculate the gradient for the unit corresponding to true label
+            mysigma = labels(true_label) - input_data(true_label);
+            output_diff(true_label) = 1/2 * false_positive_count * mysigma;
             
             % add gradient of regularization loss
             output_diff = output_diff + 2*self.lambda*sum(self.weight_vector);

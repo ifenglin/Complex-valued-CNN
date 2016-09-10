@@ -27,6 +27,9 @@ classdef Layer < matlab.mixin.Heterogeneous
         function backward(~)
             % do something
         end
+        function self = set_dropout(self)
+            % do something
+        end
         function self = update(self)
             % do something
         end

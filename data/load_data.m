@@ -1,4 +1,4 @@
-clear
+%clear
 %load test dataset
 load('cm_alldata.mat');
 load('cm_city.mat');

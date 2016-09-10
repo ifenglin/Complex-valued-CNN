@@ -13,6 +13,7 @@ classdef affine_layer < Layer
         forward_sum        % for gradient calculation
         units_delta        % updated weights to apply when updating
         bias_delta         % updated bias to apply when updating
+        dropout            % dropout mask, 0s are drop-out
     end 
     
     methods (Access = public)
@@ -29,6 +30,7 @@ classdef affine_layer < Layer
             self.bias = complex(rand_bias_real, rand_bias_imag);
             self.alpha = alpha;
             self.units_delta = complex(zeros(size(self.units)));
+            self.dropout = ones(size(self.units));
             self.bias_delta = complex(zeros(size(self.bias)));
         end
         function units = get_weights(self)
@@ -41,7 +43,7 @@ classdef affine_layer < Layer
             assert(length(input_blob.get_data()) == self.num_input)
             input_data = reshape(input_blob.get_data(), self.num_input, 1);
             self.forward_input_data = input_data;
-            output_data = self.units' * input_data + self.bias;
+            output_data = (self.dropout .* self.units)' * input_data + self.bias;
             self.forward_sum = output_data;
             %output_data = arrayfun(@self.activate, output_data);
             output_data = output_data / norm(output_data);
@@ -71,15 +73,17 @@ classdef affine_layer < Layer
             % replicate input data by num
             forward_input_data_array = repmat(self.forward_input_data, 1, self.num); 
             self.units_delta = self.units_delta + self.alpha * ( forward_input_data_array .* gradients_per_weights' );
-            
             self.bias_delta = self.bias_delta + self.alpha * gradients_per_bias;
         end
         
         function self = update(self)
-            self.units = self.units + self.units_delta;
+            self.units = self.units + self.dropout .* self.units_delta;
             self.bias = self.bias + self.bias_delta;
             self.units_delta = complex(zeros(size(self.units)));
             self.bias_delta = complex(zeros(size(self.bias))); 
+        end
+        function self = set_dropout(self)
+            self.dropout = rand(self.num_input, self.num) ./ sqrt(2/self.num_input) > 1;
         end
     end
     % below is obsoleted owing to new findings

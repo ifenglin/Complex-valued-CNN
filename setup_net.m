@@ -8,14 +8,14 @@
 % learning_rate is defined for affine layers
 % convolution layers need even smaller learning rate owing to the
 % convolution in backward-propagation.
-learning_rate = 1e-4;
+learning_rate = 1e-3;
 
 %obsoleted layers for images in 64 x 64
 %conv_layer2 = convolution_layer(5, 6, 64, 1, 1e-8);
 %acti_layer2 = activation_layer('ReLU');
 %pool_layer2 = pooling_layer('MAX', 3, 3);
 
-conv_layer3 = convolution_layer(3, 6, 32, 1, learning_rate*1e-2);
+conv_layer3 = convolution_layer(3, 6, 32, 1, learning_rate*1e-3);
 acti_layer3 = activation_layer('ReLU');
 pool_layer3 = pooling_layer('MAX', 3, 3);
 conv_layer4 = convolution_layer(3, 32, 128, 1, learning_rate*1e-1);
@@ -30,6 +30,9 @@ class_layer = classification_layer('Magnitude', 5, 1e-1, 0);
 %layer_names = {'conv2', 'activation2' ,'pooling2', 'conv3', 'activation3' ,'pooling3', 'conv4', 'activation4' ,'pooling4', 'fc1', 'fc2', 'svm', 'classifier'};
 layer_vec = [conv_layer3 acti_layer3 pool_layer3 conv_layer4 acti_layer4 pool_layer4 aff_layer1 aff_layer2 svm class_layer];
 layer_names = {'conv-1', 'act-1' ,'pool-1', 'conv-2', 'act-2' ,'pool-2', 'fc1', 'fc2', 'svm', 'classifier'};
+%layer_vec = [aff_layer1 aff_layer2 svm class_layer];
+%layer_names = {'fc1', 'fc2', 'svm', 'classifier'};
+
 
 
 %% setup blobs automatically - don't change here
