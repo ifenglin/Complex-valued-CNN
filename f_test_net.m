@@ -8,11 +8,10 @@ function [errors, loss, est_labels, correctness_rate, output_data] = f_test_net(
     % create labels
     % label in order: city, field, forest, grass, street
     true_labels = [ 1 2 3 4 5 ];
-    %true_labels = [ 2 3 ];
     num_all_labels = 5;
     num_labels = length(true_labels);
     inputs_test = inputs_test.inputs_test(true_labels);
-    true_labels = reshape(repmat(true_labels, num, 1), [], 1);
+    true_labels = repmat(true_labels, 1, num)';
     data = zeros(size,size,num_channels,num);
      for i = 1:num
         for j = 1:num_labels

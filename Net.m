@@ -47,14 +47,15 @@ classdef Net
             num = size(input_data{:}, 4);
             est_labels = zeros(num, 1);
             errors = zeros(num, 5);
+            loss = zeros(num, 1);
             for i = 1:num 
-                disp(sprintf('# Train image %d out of %d #\n', i, num));
+                %disp(sprintf('# Train image %d out of %d #\n', i, num));
                 [self, est_labels(i), errors(i,:), loss(i)] = self.forward({input_data{:}(:,:,:,i)});
                 %losses(i,:) = res.get_data();
                 self = self.backward(known_labels(i,:));
             end
             self = self.update();
-            disp(sprintf('# Trained with %d inputs and updated.#\n', num));
+            %disp(sprintf('# Trained with %d inputs and updated.#\n', num));
         end
         
         function [est_labels, errors, loss, output_data] = test(self, input_data, num_labels)
@@ -64,9 +65,9 @@ classdef Net
             errors = zeros(num, num_labels);
             loss = zeros(num, 1);
             output_data = zeros(num, num_labels);
-            for i = 1:num 
-                disp(sprintf('# Test image %d #\n', i));
-                [self, est_labels(i), errors(i,:), loss(i), output_data(i,:)] = self.forward({input_data{:}(:,:,:,i)});
+            parfor i = 1:num 
+                %disp(sprintf('# Test image %d #\n', i));
+                [~, est_labels(i), errors(i,:), loss(i), output_data(i,:)] = self.forward({input_data{:}(:,:,:,i)}); %#ok<PFBNS>
             end
         end
         

@@ -10,10 +10,10 @@ classdef affine_layer < Layer
         bias               % size -> num
         alpha              % learning rate
         forward_input_data % for parameter update
-        forward_sum        % for gradient calculation
         units_delta        % updated weights to apply when updating
         bias_delta         % updated bias to apply when updating
         dropout            % dropout mask, 0s are drop-out
+        gpu                % weather to use gpu to compute
     end 
     
     methods (Access = public)
@@ -32,6 +32,7 @@ classdef affine_layer < Layer
             self.units_delta = complex(zeros(size(self.units)));
             self.dropout = ones(size(self.units));
             self.bias_delta = complex(zeros(size(self.bias)));
+            self.gpu = 0;
         end
         function units = get_weights(self)
             units = self.units;
@@ -41,27 +42,28 @@ classdef affine_layer < Layer
         end
         function [self, output_data] = forward(self, input_blob)
             assert(length(input_blob.get_data()) == self.num_input)
+            % store inputs for backpropagation 
             input_data = reshape(input_blob.get_data(), self.num_input, 1);
             self.forward_input_data = input_data;
-            output_data = (self.dropout .* self.units)' * input_data + self.bias;
-            self.forward_sum = output_data;
-            %output_data = arrayfun(@self.activate, output_data);
-            output_data = output_data / norm(output_data);
-            %output_data = input_blob.set_data(output_data);
+            if self.gpu == 0
+                output_data = (self.dropout .* self.units)' * input_data + self.bias;
+                % normalize outputs
+                output_data = output_data / norm(output_data);
+            else
+                % create data in gpu
+                g_dropout = gpuArray(self.dropout);
+                g_units = gpuArray(self.units);
+                % calculate outputs
+                g_units_dropin = arrayfun(@(a,b) (a.*b), g_dropout, g_units);
+                units_dropin = gather(g_units_dropin);
+                output_data = units_dropin' * input_data + self.bias;
+                % normalize outputs
+                output_data = gather(output_data / norm(output_data));
+            end
+   
         end
+        
         function [self, output_diff] = backward(self, input_blob)
-%            switch self.ReLU
-%                case 'ReLU'
-%                     input_diff = sum(input_blob.get_diff());
-%                     replicate into num of units
-%                     input_diff = repmat(input_diff, self.num, 1);
-%                 case 'SVM'
-%                     input_diff = input_blob.get_diff();
-%                     do nothing
-%             end
-%             
-            % calculate the gradients in each unit
-%            gradients_per_unit = arrayfun(@self.d_activate, input_diff, self.forward_sum);
             %hermitian conjugate 
             input_diff = reshape(input_blob.get_diff(), self.num, 1);
             output_diff = reshape(conj(permute(self.units, [2 1]))' * input_diff, 1, 1, self.num_input);
@@ -72,7 +74,20 @@ classdef affine_layer < Layer
             
             % replicate input data by num
             forward_input_data_array = repmat(self.forward_input_data, 1, self.num); 
-            self.units_delta = self.units_delta + self.alpha * ( forward_input_data_array .* gradients_per_weights' );
+            
+            if self.gpu == 0
+                self.units_delta = self.units_delta + self.alpha * ( forward_input_data_array .* gradients_per_weights' );
+            else
+                % create data in gpu
+                g_gradients_per_weights = gpuArray(gradients_per_weights);
+                g_forward_input_data_array = gpuArray(forward_input_data_array);
+                g_units_delta = self.units_delta;
+                g_alpha = self.alpha;
+                % calculate delta
+                g_units_delta = arrayfun(@(a,b,c,d) a+b*(c.*d) , ...
+                    g_units_delta, g_alpha, g_forward_input_data_array, g_gradients_per_weights.');
+                self.units_delta = gather(g_units_delta);
+            end
             self.bias_delta = self.bias_delta + self.alpha * gradients_per_bias;
         end
         
@@ -84,40 +99,6 @@ classdef affine_layer < Layer
         end
         function self = set_dropout(self)
             self.dropout = rand(self.num_input, self.num) ./ sqrt(2/self.num_input) > 1;
-        end
-    end
-    % below is obsoleted owing to new findings
-    methods (Access = private)
-        function output = activate(self, input)
-            switch self.ReLU
-                case 'ReLU'
-                   if real(input)>0 && imag(input)>0 
-                       output = input;
-                   else
-                       output = complex(0,0);
-                   end
-                case 'SVM'
-                   output = input;
-            end        
-        end
-        function output = d_activate(self, input, forwarded_input)
-            switch self.ReLU
-                case 'ReLU'
-                   % calculate the derivative of ReLU with inputs in
-                   % forward-propagation
-                   % decompose f = u + v
-                   % refer to master thesis page 4.3.2
-                   if real(forwarded_input) > 0 && imag(forwarded_input)> 0
-                      dU = 1;
-                      dV = 1;
-                   else
-                      dU = 0;
-                      dV = 0;
-                   end
-                   output = real(input)*complex(dU, dV) + 1i*imag(input)*complex(dU, -dV);
-                case 'SVM'
-                   output = input;
-            end
         end
     end
 end
