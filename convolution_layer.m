@@ -105,14 +105,10 @@ classdef convolution_layer < Layer
                         repmat(pad(x(i):x(i)+self.kernel_size - 1, y(i):y(i)+self.kernel_size - 1, :), [1, 1, 1, self.num_group]),...
                         [1 2 4 3]);
                     forwarded_input_data_array = repmat(self.forwarded_input_data(x:x+self.kernel_size - 1, y:y+self.kernel_size - 1, :), [1, 1, 1, self.num_output]);
-                    
-                    
-                    self.kernels_delta = self.kernels_delta + self.alpha * (forwarded_input_data_array .* pad_array);
-                    
+                    self.kernels_delta = self.kernels_delta + self.alpha * (forwarded_input_data_array .* pad_array);              
                     % update bias with the sum in a pad 
                     self.bias_delta = self.bias_delta + self.alpha * ...
                        reshape(sum(sum(pad(x:x+self.kernel_size - 1, y:y+self.kernel_size - 1, :) ) ),self.num_output, 1 );
-
                     % sum all feature maps as output at (i, j)
                     output_diff(x(i):x(i)+self.kernel_size - 1, y(j):y(j)+self.kernel_size - 1, :) = ...
                         output_diff(x(i):x(i)+self.kernel_size - 1, y(j):y(j)+self.kernel_size - 1, :) + ...
