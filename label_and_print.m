@@ -5,7 +5,7 @@
 clear inputs_train inputs_test
 load 'data\cm_alldata.mat'
 % the number of pixels to skip at each step i.e. the resolution of the labeled image
-stride_print = 100;
+stride_print = 4;
 fprintf('labeling...\n');
 tic
 half_size = ceil(size_patch/2);
