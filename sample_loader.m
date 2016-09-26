@@ -1,4 +1,4 @@
-function data = sample_loader(allData, label, number, size)
+function data = sample_loader(allData, label, number, patch_size)
 % sample_loader(allData, label, number)
 % 
 % Extracts a 64 x 64 image from the complex, three-channel data contained
@@ -25,20 +25,20 @@ function data = sample_loader(allData, label, number, size)
 % example with 100 random samples from within the image labeled as "city"
 %
 %   nums = randperm(length(city));
-%   test_data = sample_loader(all_data, city, a(1:100));
+%   test_data = sample_loader(all_data, city, nums(1:100));
 %   imshow(test_data(:,:,:,1))
 if nargin < 4
-    size = 16;
+    patch_size = 16;
 end
 x = label(number(1),1);
 y = label(number(1),2);
-
-data = allData(y-(size/2)+1:y+(size/2),x-(size/2)+1:x+(size/2),:);
+half_size = ceil(patch_size/2);
+data = allData(y-half_size+1:y+half_size,x-half_size+1:x+half_size,:);
 
 if length(number) > 2
     for n = 2:length(number)
         x = label(number(n),1);
         y = label(number(n),2);
-        data = cat(4,data,allData(y-(size/2)+1:y+(size/2),x-(size/2)+1:x+(size/2),:));
+        data = cat(4,data,allData(y-half_size+1:y+half_size,x-half_size+1:x+half_size,:));
     end
 end

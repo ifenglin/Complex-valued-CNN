@@ -161,6 +161,13 @@ classdef Net
             end
             self.layer_vec = new_layer_vec;
         end
+        function self = set_learning_rate(self, alpha_percetage)
+            mylayer_vec = self.layer_vec;
+            for i = 1:length(self.layer_vec)
+               new_layer_vec(i) = mylayer_vec(i).set_learning_rate(alpha_percetage);
+            end
+            self.layer_vec = new_layer_vec;
+        end
     end
 end
 

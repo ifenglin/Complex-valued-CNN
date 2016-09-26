@@ -3,33 +3,31 @@ classdef activation_layer < Layer
     %   Detailed explanation goes here
     
     properties (Access = private)
-        ReLU    % activation type
-        forward_input_data; % keep a copy of input data during forward propagation
     end 
     
     methods (Access = public)
-        function self = activation_layer(ReLU)
+        function self = activation_layer()
             % setup self handle and attributes
             self@Layer('activation');
-            if nargin == 1
-                self.ReLU = ReLU;
-            else
-                self.ReLU = 'ReLU';
-            end
         end
+        
         function [self, output_data] = forward(self, input_blob)
-            % keep a copy of input data for backward-propagation
-            self.forward_input_data = input_blob.get_data();
-            output_data = (real(input_blob.get_data())>0 & imag(input_blob.get_data())>0) .* input_blob.get_data();
-            %output_data = arrayfun(@self.activate, input_blob.get_data());
-            %output_data = input_blob.set_data(output_data);
+            % ReLU
+%             output_data = (real(input_blob.get_data())>0 & imag(input_blob.get_data())>0) .* input_blob.get_data();
+            % tanh
+            input_data = input_blob.get_data();
+            output_data = tanh(real(input_data)) + 1i * tanh(imag(input_data));
         end
-        function [self, output_diff] = backward(self, input_blob)      
-            derivative = double(real(input_blob.get_data())>0 & imag(input_blob.get_data())>0);
-            output_diff =  real(input_blob.get_data()) .* complex(derivative, derivative) + ...
-                1i * imag(input_blob.get_data()) .* complex(derivative, -derivative);  
-            %output_diff = arrayfun(@self.d_activate, input_blob.get_diff(), self.forward_input_data);
-            %output_blob = input_blob.set_diff(output_data);
+        function [self, output_diff, units_delta, bias_delta] = backward(self, input_blob)     
+            units_delta = [];
+            bias_delta = [];
+            input_diff = input_blob.get_diff();
+            % ReLU
+%             derivative = double(real(input_blob.get_data())>0 & imag(input_blob.get_data())>0);
+%             output_diff =  real(input_blob.get_data()) .* complex(derivative, derivative) + ...
+%                 1i * imag(input_blob.get_data()) .* complex(derivative, -derivative);  
+            %tanh
+            output_diff = 1/2 * ( sech(real(input_diff))^2 - 1i * sech(imag(input_diff)^2 ));
         end
     end
     

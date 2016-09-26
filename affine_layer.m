@@ -8,7 +8,7 @@ classdef affine_layer < Layer
         units              % size -> num * num_inputs
         bias               % size -> num
         alpha              % learning rate
-        %forward_input_data % for parameter update
+%         forward_input_data % for parameter update
 %         units_delta        % updated weights to apply when updating
 %         bias_delta         % updated bias to apply when updating
         dropout            % dropout mask, 0s are drop-out
@@ -108,6 +108,9 @@ classdef affine_layer < Layer
         end
         function self = set_dropout(self)
             self.dropout = rand(self.num_input, self.num) ./ sqrt(2/self.num_input) > 1;
+        end
+        function self = set_learning_rate(self, alpha_percetage)
+            self.alpha = self.alpha * alpha_percetage;
         end
     end
 end

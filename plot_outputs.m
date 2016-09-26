@@ -1,9 +1,9 @@
 figure;
 hold on
-j = 5:5:25;
+j = label_plot:5:test_num_reps*num_all_labels;
 color = ['r', 'g', 'b', 'c', 'm'];
 for i = 1:5  
-    plot(real(squeeze(mean(test_output_data(1:5:end,j,i),2))), imag(squeeze(mean(test_output_data(1:5:end,j,i),2))),color(i));
+    plot(real(squeeze(mean(test_output_data(:,j,i),2))), imag(squeeze(mean(test_output_data(:,j,i),2))),sprintf('%c',color(i)));
 end
 for i = 1:5  
     plot(real(squeeze(mean(test_output_data(1,j,i),2))), imag(squeeze(mean(test_output_data(1,j,i),2))), sprintf('%co',color(i)));
@@ -19,4 +19,4 @@ end
 legend('label 1', 'label 2', 'label 3', 'label 4', 'label 5')
 xlabel('average real')
 ylabel('average imag')
-title(sprintf('vote over epochs where true label = %d', j(1)))
+title(sprintf('vote over epochs in tests where true label = %d', j(1)))

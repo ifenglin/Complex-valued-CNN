@@ -1,8 +1,8 @@
 %% this creates the input data for test_net.m
 % run load_data.m first
-num = 10000;
-size = 1;
-ch = 96;
+num = 100;
+size = 16;
+ch = 6;
 % create very simple data 
 [city, field, forest, grass, street] = very_simple_data_loader(size, ch, num);
 

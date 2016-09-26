@@ -63,7 +63,8 @@ classdef pooling_layer < Layer
                     temp_switches(patch_x, patch_y, :) = reshape(switch_mask, self.kernel_size, self.kernel_size, num_channels);
                 end
             end
-            for i = 1:num_channels
+            % normalization
+            parfor i = 1:num_channels
                 nom = norm(output_data(:, :, i));
                 if nom ~= 0
                     output_data(:, :, i) = output_data(:, :, i) / nom;
@@ -72,7 +73,7 @@ classdef pooling_layer < Layer
             self.switches = temp_switches(self.h_range, self.w_range, :);
             %output_blob = input_blob.set_data(output_data);
         end
-        function [self, output_diff] = backward(self, input_blob)
+        function [self, output_diff, delta_weights, delta_bias] = backward(self, input_blob)
             % calculate the additional pixels needed for pooling on the
             % boundaries
             pad = zeros(size(self.switches,1) + self.h_margin,...
@@ -91,15 +92,17 @@ classdef pooling_layer < Layer
                     patch_y = y(j):y(j)+self.kernel_size-1;
                     % assign the diff to the activated cell, looping for
                     % every chanel
-                    for k = 1:num_channels
-                        pad(patch_x, patch_y,k) = pad(patch_x, patch_y,k) * input_blob.get_diff(i, j, k);
+                    input_diff = input_blob.get_diff(i, j);
+                    parfor k = 1:num_channels
+                        pad(patch_x, patch_y, k) = pad(patch_x, patch_y, k) .* input_diff(:, :, k);
                     end
                     %onepatch_columns = onepatch_columns * reshape(input_blob.get_diff(i, j),[], num_channels)';
                     %pad(patch_x, patch_y,:) = reshape(onepatch_columns, self.kernel_size, self.kernel_size, num_channels);
                 end
             end 
             output_diff = pad(self.h_range, self.w_range, :);
-            %output_blob = input_blob.set_diff(output_data);
+            delta_weights = [];
+            delta_bias = [];
         end
     end
     

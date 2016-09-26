@@ -1,20 +1,23 @@
-%% run create_test_data.m first and make sure it generates enough inputs of
-% the same size (check variable 'num' and 'size')
-% run setup_net.m first
-
-% number of tests for each label
-test_num = 5;
-size = 16;
-ch = 6;
-test_num_labels = 5;
-num_all_labels = 5;
-%use create_test_data.m before testing
-test_errors = zeros(1, test_num*test_num_labels, num_all_labels);
-test_loss = zeros(1, test_num*test_num_labels);
-test_est_labels = zeros(1, test_num*test_num_labels);
-test_correctness_rate = zeros(1, 1);
-test_output_data = zeros(1, test_num*test_num_labels, num_all_labels);
-
-[test_errors(1,:,:), test_loss(1,:), test_est_labels(1, :),...
-        test_correctness_rate(1), test_output_data(1,:,:)] = ...
-        f_test_net(myNet, size, ch, test_num);
+%% This programs is meant to evaluate the trained network with entire 
+%% testing set. 
+%% Prerequisite: run setup_data.m to prepare inputs_test.mat.
+%% If the testing set is big, it takes a while.
+%% Note: the testing set is always loaded from a file to save memory.
+load 'data\inputs_test.mat'
+tic
+big_test_num_reps = test_num_reserve;
+test_data = zeros(size_patch, size_patch, num_channels, test_num_labels * big_test_num_reps);
+fprintf('evaluating the network...\n');
+for i = 1:big_test_num_reps
+    for j = 1:test_num_labels
+        test_data(:,:,:,(i-1)*test_num_labels+j) = inputs_test{j}(:,:,:,i);
+    end
+end
+[big_test_errors, big_test_loss, big_test_est_labels, ...
+    big_test_correctness_rate, big_test_output_data] = f_test_net(myNet, test_data, test_known_labels, big_test_num_reps);
+fprintf('The overall correctness rate is %f\n', big_test_correctness_rate);
+for i=1:length(test_known_labels)
+    fprintf('Label %d is correctly labeled at rate %f\n', test_known_labels(i), sum(big_test_est_labels(i:test_num_labels:end) == test_known_labels(i))/big_test_num_reps);
+end
+toc
+clear test_data

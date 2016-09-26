@@ -42,6 +42,9 @@ classdef Layer < matlab.mixin.Heterogeneous
         function self = update(self, ~, ~)
             % do something
         end
+        function self = set_learning_rate(self, ~)
+            % do something
+        end
     end
 end
 
