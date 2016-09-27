@@ -8,7 +8,7 @@ num_channels = 6;
 
 %% training configuration
 % number of epochs
-num_epochs = 12;
+num_epochs = 3;
 
 % number of batches in one epoch
 num_batches = 8;
@@ -30,6 +30,7 @@ test_num_reserve = 25653;
 
 % labels in testing set
 test_known_labels = [ 1 2 3 4 5 ];
+test_names_labels = {'city' 'field' 'forest' 'grass' 'street'};
 
 % number of labels in testing set
 test_num_labels = length(test_known_labels);

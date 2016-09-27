@@ -1,7 +1,7 @@
 %% run setup_params.m and setup_net.m first
 %% Prerequisite: run setup_data.m to set variables inputs_test and 
 %% inputs_train, or uncomment the line below to load from a mat file
-%load('data\inputs_train.mat');
+load('data\inputs_train.mat');
 
 % prepare testing data - select a set of labels in testing data and 
 % only a subset of them accroding to params
@@ -72,9 +72,10 @@ clear data
 save 'data\myNet.mat' 'myNet' -v7.3
 
 % analysis
-for i = fliplr(1:length(train_known_labels))
-    label_plot = train_known_labels(i);
-    plot_outputs;
-    plot_errors;
+for i = 1:length(train_known_labels)
+    plot_outputs(test_size_batch, test_output_data, test_names_labels, train_known_labels(i))
+    plot_errors(num_epochs, test_errors, test_names_labels, train_known_labels(i));
 end
-plot_loss;
+plot_loss(num_epochs, test_loss, test_correctness_rate);
+clear inputs_test inputs_train 
+save 'data\workspace_after_training.mat' -v7.3
