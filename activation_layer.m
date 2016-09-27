@@ -27,7 +27,7 @@ classdef activation_layer < Layer
 %             output_diff =  real(input_blob.get_data()) .* complex(derivative, derivative) + ...
 %                 1i * imag(input_blob.get_data()) .* complex(derivative, -derivative);  
             %tanh
-            output_diff = 1/2 * ( sech(real(input_diff))^2 - 1i * sech(imag(input_diff)^2 ));
+            output_diff = 1/2 * ( sech(real(input_diff)).^2 - 1i * sech(imag(input_diff).^2 ));
         end
     end
     

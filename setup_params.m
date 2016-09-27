@@ -8,13 +8,13 @@ num_channels = 6;
 
 %% training configuration
 % number of epochs
-num_epochs = 3;
+num_epochs = 10;
 
 % number of batches in one epoch
-num_batches = 8;
+num_batches = 10;
 
 % number of repeatance of given labels in one batch in training set
-num_reps = 1;
+num_reps = 3190;
 
 % labels in training set
 train_known_labels = [ 1 2 3 4 5 ];
@@ -22,11 +22,11 @@ train_known_labels = [ 1 2 3 4 5 ];
 %% testing configuration
 
 % number of inputs of given labels in testing set
-test_num_reps = 1;
+test_num_reps = 1000;
 
 % maximal number of repeatance of given labels in testing set
 % test_num_reserve + size_epoch should not exceed the size of any classes
-test_num_reserve = 1;
+test_num_reserve = 31928;
 
 % labels in testing set
 test_known_labels = [ 1 2 3 4 5 ];
@@ -45,6 +45,16 @@ test_cycle = 1;
 % the resolution of the final labeled image
 % 1 means to label and print every pixel
 stride_print = 100;
+
+%% quick check configuration
+%quick_check=0
+if (exist('quick_check', 'var') && quick_check == 1)
+    num_epochs = 1;
+    num_batches = 1;
+    num_reps = 1;
+    test_num_reps = 1;
+    test_num_reserve = 1;
+end
 
 %% Don't change anything below unless you know what you are doing
 

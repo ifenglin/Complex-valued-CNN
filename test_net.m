@@ -17,7 +17,7 @@ end
     big_test_correctness_rate, big_test_output_data] = f_test_net(myNet, test_data, test_known_labels, big_test_num_reps);
 fprintf('The overall correctness rate is %f\n', big_test_correctness_rate);
 for i=1:length(test_known_labels)
-    fprintf('Label %d is correctly labeled at rate %f\n', test_known_labels(i), sum(big_test_est_labels(i:test_num_labels:end) == test_known_labels(i))/big_test_num_reps);
+    fprintf('Label %s is correctly labeled at rate %f\n', test_names_labels{i}, sum(big_test_est_labels(i:test_num_labels:end) == test_known_labels(i))/big_test_num_reps);
 end
 toc
 clear test_data

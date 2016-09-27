@@ -10,6 +10,11 @@
 %% Warning: we clear everything first.
 clear
 
+%% quick check?
+% For debuging purpose, set this option to run the scripts with minimal
+% data and loops.
+quick_check = 1;
+
 %% First, set up a network by runing setup_net.m
 % By default, it has two convolutional layers (three component layers
 % each) and two fully connected layer of size 128, and a five-way
