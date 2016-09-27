@@ -11,10 +11,10 @@ num_channels = 6;
 num_epochs = 10;
 
 % number of batches in one epoch
-num_batches = 10;
+num_batches = 9;
 
 % number of repeatance of given labels in one batch in training set
-num_reps = 3190;
+num_reps = 3116;
 
 % labels in training set
 train_known_labels = [ 1 2 3 4 5 ];
@@ -26,7 +26,7 @@ test_num_reps = 1000;
 
 % maximal number of repeatance of given labels in testing set
 % test_num_reserve + size_epoch should not exceed the size of any classes
-test_num_reserve = 31928;
+test_num_reserve = 28044;
 
 % labels in testing set
 test_known_labels = [ 1 2 3 4 5 ];
