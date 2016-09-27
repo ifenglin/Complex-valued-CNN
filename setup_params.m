@@ -44,7 +44,7 @@ test_cycle = 1;
 %% configuration of image labelling
 % the resolution of the final labeled image
 % 1 means to label and print every pixel
-stride_print = 100;
+stride_print = 4;
 
 %% quick check configuration
 %quick_check=0
@@ -54,6 +54,7 @@ if (exist('quick_check', 'var') && quick_check == 1)
     num_reps = 1;
     test_num_reps = 1;
     test_num_reserve = 1;
+    stride_print = 100;
 end
 
 %% Don't change anything below unless you know what you are doing
