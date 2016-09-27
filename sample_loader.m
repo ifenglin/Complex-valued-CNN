@@ -33,12 +33,12 @@ end
 x = label(number(1),1);
 y = label(number(1),2);
 half_size = ceil(patch_size/2);
-data = allData(y-half_size+2:y+half_size+1, x-half_size+2:x+half_size+1, :);
+data = allData(y-half_size+1:y+half_size, x-half_size+2:x+half_size+1, :);
 
 if length(number) > 2
     for n = 2:length(number)
         x = label(number(n),1);
         y = label(number(n),2);
-        data = cat(4, data, allData(y-half_size+2:y+half_size+1, x-half_size+2:x+half_size+1, :));
+        data = cat(4, data, allData(y-half_size+1:y+half_size, x-half_size+2:x+half_size+1, :));
     end
 end

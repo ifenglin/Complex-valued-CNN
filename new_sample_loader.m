@@ -31,7 +31,7 @@ half_size = ceil(patch_size/2);
 for i = 1:length(x)
     my_data = allData(:,x(i)-half_size+2:x(i)+half_size+1,:);
     parfor j = 1:length(y)
-        data(:,:,:,j,i) = my_data(y(j)-half_size+2:y(j)+half_size+1,:,:);
+        data(:,:,:,j,i) = my_data(y(j)-half_size+1:y(j)+half_size,:,:);
     end
 end
 data = reshape(data, size(data,1), size(data,2), size(data,3), []);
