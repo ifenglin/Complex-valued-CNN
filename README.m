@@ -11,7 +11,7 @@
 clear
 
 %% quick check?
-% For debuging purpose, set this option to run the scripts with minimal
+% To test your environment, set this option to run the scripts with minimal
 % data and loops.
 quick_check = 1;
 

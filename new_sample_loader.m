@@ -1,4 +1,4 @@
-function data = new_sample_loader(allData, x, y, patch_size)
+lfunction data = new_sample_loader(allData, x, y, patch_size)
 % sample_loader(allData, label, number)
 % 
 % Extracts a 64 x 64 image from the complex, three-channel data contained
@@ -29,9 +29,9 @@ if nargin < 4
 end
 half_size = ceil(patch_size/2);
 for i = 1:length(x)
-    my_data = allData(:,x(i)-half_size+1:x(i)+half_size,:);
+    my_data = allData(:,x(i)-half_size+2:x(i)+half_size+1,:);
     parfor j = 1:length(y)
-        data(:,:,:,j,i) = my_data(y(j)-half_size+1:y(j)+half_size,:,:);
+        data(:,:,:,j,i) = my_data(y(j)-half_size+2:y(j)+half_size+1,:,:);
     end
 end
 data = reshape(data, size(data,1), size(data,2), size(data,3), []);
