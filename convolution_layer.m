@@ -95,9 +95,10 @@ classdef convolution_layer < Layer
             % calculate the additional pixels needed for de-convolute on the
             % boundaries
             diff_pad = complex(zeros(height, width, self.num_output), 0);
-            diff_pad(floor(self.kernel_size-1)/2 + 1: height_diff + floor(self.kernel_size-1)/2, ...
-                floor(self.kernel_size-1)/2 + 1: width_diff +  floor(self.kernel_size-1)/2, ...
-                 :) = input_diff(:,:,:);
+            half_kernel_size = floor((self.kernel_size-1)/2);
+            diff_pad(half_kernel_size + 1: height_diff + half_kernel_size, ...
+                half_kernel_size + 1: width_diff +  half_kernel_size, ...
+                 :) = input_diff;
             % index of the left top corner of a patch in pad
             x = 1:self.stride:height - self.kernel_size + 1;
             y = 1:self.stride:width - self.kernel_size + 1;

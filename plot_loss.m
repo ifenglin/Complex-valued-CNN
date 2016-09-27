@@ -10,4 +10,5 @@ function plot_loss(num_epochs, test_loss, test_correctness_rate)
     legend('loss', 'correctness')
     title('loss and correctness rate over epochs')
     hold off
+    saveas(gcf, 'data\learning_curve.png')
 end

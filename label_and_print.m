@@ -5,7 +5,6 @@
 clear inputs_train inputs_test
 load 'data\cm_alldata.mat'
 % the number of pixels to skip at each step i.e. the resolution of the labeled image
-stride_print = 4;
 fprintf('labeling...\n');
 tic
 half_size = ceil(size_patch/2);
@@ -33,6 +32,7 @@ result_label(:,:,2) = (test_image_est_labels==3)*0.5;
 result_label(:,:,2) = result_label(:,:,2) + (test_image_est_labels==2);
 result_label(:,:,2) = result_label(:,:,2) + (test_image_est_labels==4);
 result_label(:,:,3) = test_image_est_labels==5;
-
 imshow(result_label);
-clear result_size result_label result_label
+imwrite(result_label, sprintf('data\\map_res_%d.png', stride_print));
+
+clear A result_size result_label result_label
