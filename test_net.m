@@ -13,6 +13,7 @@ for i = 1:big_test_num_reps
         test_data(:,:,:,(i-1)*test_num_labels+j) = inputs_test{j}(:,:,:,i);
     end
 end
+clear inputs_test
 [big_test_errors, big_test_loss, big_test_est_labels, ...
     big_test_correctness_rate, big_test_output_data] = f_test_net(myNet, test_data, test_known_labels, big_test_num_reps);
 fprintf('The overall correctness rate is %f\n', big_test_correctness_rate);

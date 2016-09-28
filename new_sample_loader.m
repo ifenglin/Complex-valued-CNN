@@ -1,4 +1,4 @@
-lfunction data = new_sample_loader(allData, x, y, patch_size)
+function data = new_sample_loader(allData, x, y, patch_size)
 % sample_loader(allData, label, number)
 % 
 % Extracts a 64 x 64 image from the complex, three-channel data contained

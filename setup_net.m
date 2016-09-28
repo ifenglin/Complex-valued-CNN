@@ -18,10 +18,10 @@ dec_learning_rate = 0.95;
 % The first convolutional layer 
 % has 32 kernels of depth 6. The second convolutional layer 
 % has 32 kernels of depth 6. 
-conv_layer1 = convolution_layer(3, 6, 32, 1, init_learning_rate*1e-4);
+conv_layer1 = convolution_layer(3, 6, 32, 1, init_learning_rate*1e-6);
 acti_layer1 = activation_layer();
 pool_layer1 = pooling_layer('MAX', 3, 3);
-conv_layer2 = convolution_layer(3, 32, 128, 1, init_learning_rate*1e-2);
+conv_layer2 = convolution_layer(3, 32, 128, 1, init_learning_rate*1e-3);
 acti_layer2 = activation_layer();
 pool_layer2 = pooling_layer('MAX', 3, 3);
 aff_layer1 = affine_layer(128, 128, init_learning_rate);

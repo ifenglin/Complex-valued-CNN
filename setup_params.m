@@ -8,13 +8,13 @@ num_channels = 6;
 
 %% training configuration
 % number of epochs
-num_epochs = 10;
+num_epochs = 15;
 
 % number of batches in one epoch
-num_batches = 9;
+num_batches = 10;
 
 % number of repeatance of given labels in one batch in training set
-num_reps = 3116;
+num_reps = 2495;
 
 % labels in training set
 train_known_labels = [ 1 2 3 4 5 ];
@@ -22,11 +22,11 @@ train_known_labels = [ 1 2 3 4 5 ];
 %% testing configuration
 
 % number of inputs of given labels in testing set
-test_num_reps = 1000;
+test_num_reps = 100;
 
 % maximal number of repeatance of given labels in testing set
 % test_num_reserve + size_epoch should not exceed the size of any classes
-test_num_reserve = 28044;
+test_num_reserve = 24927;
 
 % labels in testing set
 test_known_labels = [ 1 2 3 4 5 ];
@@ -41,7 +41,7 @@ num_all_labels = 5;
 % do test after the number of epochs
 test_cycle = 1;
 
-%% configuration of image labelling
+%% configuration of image labeling
 % the resolution of the final labeled image
 % 1 means to label and print every pixel
 stride_print = 4;
@@ -74,4 +74,4 @@ size_epoch = num_reps * num_batches;
 % number of tests will be done over epochs
 test_num = ceil(num_epochs / test_cycle) + 1;
 
-save 'data\params.mat'
+%save 'data\params.mat'
