@@ -1,7 +1,9 @@
-%% This is an instructional program to set up a complex-valued neural 
+%% This is an instructional script for Matlab to set up a complex-valued neural 
 %% network and, to train it with a dataset of 5 classes in mini-batch 
 %% training, and finally to evalute the trained network with test and 
 %% to visualize results.
+%% For more information about this project, please refer to report.pdf
+
 % The programs are developed in Matlab R2016a and Parallel Computing
 % Toolbox Older versions may have conflicts in syntax.
 % Note: in case no Parallel Computing Toolbox available, replace all the
